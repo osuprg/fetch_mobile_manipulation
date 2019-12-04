@@ -15,15 +15,21 @@ from math import sin, cos
 from moveit_python import (MoveGroupInterface,
                            PlanningSceneInterface,
                            PickPlaceInterface)
-from moveit_python.geometry import rotate_pose_msg_by_euler_angles
+#from moveit_python.geometry import rotate_pose_msg_by_euler_angles
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from control_msgs.msg import PointHeadAction, PointHeadGoal
 from grasping_msgs.msg import FindGraspableObjectsAction, FindGraspableObjectsGoal
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from gazebo_msgs.srv import GetModelStateRequest, GetModelState
+import pdb
+import moveit_commander
+import tf
+
+import numpy as np
 
 # Move base using navigation stack
 class MoveBaseClient(object):
@@ -37,8 +43,14 @@ class MoveBaseClient(object):
         move_goal = MoveBaseGoal()
         move_goal.target_pose.pose.position.x = x
         move_goal.target_pose.pose.position.y = y
-        move_goal.target_pose.pose.orientation.z = sin(theta/2.0)
-        move_goal.target_pose.pose.orientation.w = cos(theta/2.0)
+        
+        quat = tf.transformations.quaternion_from_euler(0, 0, theta) #rotation about z axis
+        
+        move_goal.target_pose.pose.orientation.x = quat[0]
+        move_goal.target_pose.pose.orientation.y = quat[1]
+        move_goal.target_pose.pose.orientation.z = quat[2]
+        move_goal.target_pose.pose.orientation.w = quat[3]
+        
         move_goal.target_pose.header.frame_id = frame
         move_goal.target_pose.header.stamp = rospy.Time.now()
 
@@ -81,7 +93,7 @@ class PointHeadClient(object):
         rospy.loginfo("Waiting for head_controller...")
         self.client.wait_for_server()
 
-    def look_at(self, x, y, z, frame, duration=1.0):
+    def look_at(self, x = 1, y = 0, z = 0, frame = 'base_link', duration=1.0):
         goal = PointHeadGoal()
         goal.target.header.stamp = rospy.Time.now()
         goal.target.header.frame_id = frame
@@ -96,6 +108,7 @@ class PointHeadClient(object):
 class GraspingClient(object):
 
     def __init__(self):
+        
         self.scene = PlanningSceneInterface("base_link")
         self.pickplace = PickPlaceInterface("arm", "gripper", verbose=True)
         self.move_group = MoveGroupInterface("arm", "base_link")
@@ -128,7 +141,7 @@ class GraspingClient(object):
             self.scene.addSolidPrimitive(obj.object.name,
                                          obj.object.primitives[0],
                                          obj.object.primitive_poses[0],
-                                         wait = False)
+                                         )
 
         for obj in find_result.support_surfaces:
             # extend surface to floor, and make wider since we have narrow field of view
@@ -142,7 +155,7 @@ class GraspingClient(object):
             self.scene.addSolidPrimitive(obj.name,
                                          obj.primitives[0],
                                          obj.primitive_poses[0],
-                                         wait = False)
+                                         )
 
         self.scene.waitForSync()
 
@@ -220,46 +233,91 @@ class GraspingClient(object):
             if result.error_code.val == MoveItErrorCodes.SUCCESS:
                 return
 
+class AmclPose:
+    
+    def __init__(self):
+        
+        self.pose_setter = rospy.Publisher('initialpose', PoseWithCovarianceStamped, queue_size=10)
+    
+    def set_pose(self, x = 0, y = 0 , theta = 0, frame='map'):
+        
+        init_pose = PoseWithCovarianceStamped()
+        
+        init_pose.pose.pose.position.x = x
+        init_pose.pose.pose.position.y = y
+        
+        #TODO - Euler to Quartnernion change, now ignoring theta
+        
+        init_pose.pose.pose.orientation.w = 1
+        
+        self.pose_setter.publish(init_pose)
+        
+class GazeboPoseMaster:
+    
+    def __init__(self, get_pose_srv_name = 'gazebo/get_model_state'):
+        
+        self.get_pose_srv_name = get_pose_srv_name
+        self.pose_getter = rospy.ServiceProxy(self.get_pose_srv_name, GetModelState)
+
+    def get_pose(self, object_name = 'coke_can'):
+        
+        obj_pose_req = GetModelStateRequest()
+
+        obj_pose_req.model_name = object_name
+
+        rospy.wait_for_service(self.get_pose_srv_name)
+        obj_pose = self.pose_getter(obj_pose_req)
+        
+        #pdb.set_trace()
+        return np.array([obj_pose.pose.position.x,obj_pose.pose.position.y, obj_pose.pose.position.z, 
+                         obj_pose.pose.orientation.x, obj_pose.pose.orientation.y, obj_pose.pose.orientation.z, obj_pose.pose.orientation.w ])
+    
 if __name__ == "__main__":
     # Create a node
     rospy.init_node("demo")
-
+    
     # Make sure sim time is working
     while not rospy.Time.now():
         pass
-
+    
+    amcl = AmclPose()
     # Setup clients
     move_base = MoveBaseClient()
 #    torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
     head_action = PointHeadClient()
     grasping_client = GraspingClient()
-
+        
+    gazebo_client = GazeboPoseMaster()
+    
+#
     # Move the base to be in front of the table
     # Demonstrates the use of the navigation stack
-    rospy.loginfo("Moving to table...")
-    move_base.goto(-0.46, 1.66, 90.0)
-    #move_base.goto(2.750, 3.118, 0.0)
+##    rospy.loginfo("Setting initial pose")
+#    amcl.set_pose()
+##    rospy.loginfo("Moving to table...")
+#    move_base.goto(-0.46, 1.66, 1.57)
+#
+##    # Point the head at the cube we want to pick
+#    head_action.look_at(1, 0, 0, "base_link")
+#    
+#    print(gazebo_client.get_pose())
+    
+#
+    # Get block to pick
+    while not rospy.is_shutdown():
+        rospy.loginfo("Picking object...")
+        grasping_client.updateScene()
+        cube, grasps = grasping_client.getGraspableCube()
+        #import pdb
+        pdb.set_trace()
+        if cube == None:
+            rospy.logwarn("Perception failed.")
+            continue
 
-    # Raise the torso using just a controller
-#    rospy.loginfo("Raising torso...")
-#    torso_action.move_to([0.4, ])
-#
-    # Point the head at the cube we want to pick
-    head_action.look_at(-0.46, 2.5, 0.3, "map")
-#
-#    # Get block to pick
-#    while not rospy.is_shutdown():
-#        rospy.loginfo("Picking object...")
-#        grasping_client.updateScene()
-#        cube, grasps = grasping_client.getGraspableCube()
-#        if cube == None:
-#            rospy.logwarn("Perception failed.")
-#            continue
-#
-#        # Pick the block
-#        if grasping_client.pick(cube, grasps):
-#            break
-#        rospy.logwarn("Grasping failed.")
+        # Pick the block
+        if grasping_client.pick(cube, grasps):
+            break
+        rospy.logwarn("Grasping failed.")
 #
 #    # Tuck the arm
 #    grasping_client.tuck()
