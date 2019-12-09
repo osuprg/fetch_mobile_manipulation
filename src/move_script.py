@@ -19,6 +19,7 @@ from moveit_python import (MoveGroupInterface,
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from control_msgs.msg import PointHeadAction, PointHeadGoal
+from control_msgs.msg import GripperCommandGoal, GripperCommandAction
 from grasping_msgs.msg import FindGraspableObjectsAction, FindGraspableObjectsGoal
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -28,6 +29,7 @@ from gazebo_msgs.srv import GetModelStateRequest, GetModelState
 import pdb
 import moveit_commander
 import tf
+import sys
 
 import numpy as np
 
@@ -107,17 +109,88 @@ class PointHeadClient(object):
 # Tools for grasping
 class GraspingClient(object):
 
-    def __init__(self):
+    def __init__(self, group="arm"):
         
-        self.scene = PlanningSceneInterface("base_link")
-        self.pickplace = PickPlaceInterface("arm", "gripper", verbose=True)
-        self.move_group = MoveGroupInterface("arm", "base_link")
+#        self.scene = PlanningSceneInterface("base_link")
+#        self.pickplace = PickPlaceInterface("arm", "gripper", verbose=True)
+#        self.move_group = MoveGroupInterface("arm", "base_link")
+#
+#        find_topic = "basic_grasping_perception/find_objects"
+#        rospy.loginfo("Waiting for %s..." % find_topic)
+#        self.find_client = actionlib.SimpleActionClient(find_topic, FindGraspableObjectsAction)
+#        self.find_client.wait_for_server()
+        import tf
+        self.listener = tf.TransformListener()
+        
+        moveit_commander.roscpp_initialize(sys.argv)
+        
+        self.robot = moveit_commander.RobotCommander()
+        self.scene = moveit_commander.PlanningSceneInterface("base_link")
+        self.group = moveit_commander.MoveGroupCommander(group)
+        self.group.set_goal_tolerance(0.005)
+        
+        #gripper params
+        self.gripper_closed_pos = 0  # The position for a fully-closed gripper (meters).
+        self.gripper_open_pos = 0.10  # The position for a fully-open gripper (meters).
+        self.MIN_EFFORT = 35  # Min grasp force, in Newtons
+        self.MAX_EFFORT = 100  # Max grasp force, in Newtons
+        self.gripper_action_server_name = 'gripper_controller/gripper_action'
+        self.gripper_client = actionlib.SimpleActionClient(self.gripper_action_server_name, GripperCommandAction)
+        self.gripper_client.wait_for_server(rospy.Duration(10))
 
-        find_topic = "basic_grasping_perception/find_objects"
-        rospy.loginfo("Waiting for %s..." % find_topic)
-        self.find_client = actionlib.SimpleActionClient(find_topic, FindGraspableObjectsAction)
-        self.find_client.wait_for_server()
+        
+    def pick(self, obj_gazebo_pose):
+         
+         #assuming object pose is in gazebo frame, need to transform to base link frame
+         grasp_pose = PoseStamped()
+         grasp_pose.pose.position = obj_gazebo_pose.pose.position
+         grasp_pose.pose.position.z += 0.3
+         #grasp_pose.pose.position.x = 0.4
+         #grasp_pose.pose.position.y = 0.4
+         
+         quat = tf.transformations.quaternion_from_euler(0, np.pi/2, 0) #rotation about z axis
+         #quat = [0.051, 0.686, -0.037, 0.725]
+         grasp_pose.pose.orientation.x = quat[0]
+         grasp_pose.pose.orientation.y = quat[1]
+         grasp_pose.pose.orientation.z = quat[2]
+         grasp_pose.pose.orientation.w = quat[3]
+         #grasp_pose.pose.position = obj_gazebo_pose.pose
+         #grasp_pose.header.frame_id = 'base_link'
+         grasp_pose.header.stamp = rospy.Time.now()
+         grasp_pose.header.frame_id = 'map'
+         pdb.set_trace()
+         self.group.set_pose_target(grasp_pose)
+         pdb.set_trace()
+         #p1 = self.group.plan()
+         #self.group.go()
+         self.gripper_open()
+         self.gripper_close()
+         #group.get_end_effector_link()
 
+    def gripper_open(self):
+        """Opens the gripper.
+        """
+        goal = GripperCommandGoal()
+        goal.command.position = self.gripper_open_pos
+        goal.command.max_effort = self.MAX_EFFORT
+        self.gripper_client.send_goal(goal)
+        self.gripper_client.wait_for_result()
+        
+
+    def gripper_close(self, max_effort= None):
+        """Closes the gripper.
+        Args:
+            max_effort: The maximum effort, in Newtons, to use. Note that this
+                should not be less than 35N, or else the gripper may not close.
+        """
+        
+        goal = GripperCommandGoal()
+        goal.command.position = self.gripper_closed_pos
+        goal.command.max_effort = self.MAX_EFFORT
+        self.gripper_client.send_goal(goal)
+        self.gripper_client.wait_for_result()
+        
+        
     def updateScene(self):
         # find objects
         goal = FindGraspableObjectsGoal()
@@ -163,66 +236,8 @@ class GraspingClient(object):
         self.objects = find_result.objects
         self.surfaces = find_result.support_surfaces
 
-    def getGraspableCube(self):
-        graspable = None
-        for obj in self.objects:
-            # need grasps
-            if len(obj.grasps) < 1:
-                continue
-            # check size
-            if obj.object.primitives[0].dimensions[0] < 0.05 or \
-               obj.object.primitives[0].dimensions[0] > 0.07 or \
-               obj.object.primitives[0].dimensions[0] < 0.05 or \
-               obj.object.primitives[0].dimensions[0] > 0.07 or \
-               obj.object.primitives[0].dimensions[0] < 0.05 or \
-               obj.object.primitives[0].dimensions[0] > 0.07:
-                continue
-            # has to be on table
-            if obj.object.primitive_poses[0].position.z < 0.5:
-                continue
-            return obj.object, obj.grasps
-        # nothing detected
-        return None, None
-
-    def getSupportSurface(self, name):
-        for surface in self.support_surfaces:
-            if surface.name == name:
-                return surface
-        return None
-
-    def getPlaceLocation(self):
-        pass
-
-    def pick(self, block, grasps):
-        success, pick_result = self.pickplace.pick_with_retry(block.name,
-                                                              grasps,
-                                                              support_name=block.support_surface,
-                                                              scene=self.scene)
-        self.pick_result = pick_result
-        return success
-
-    def place(self, block, pose_stamped):
-        places = list()
-        l = PlaceLocation()
-        l.place_pose.pose = pose_stamped.pose
-        l.place_pose.header.frame_id = pose_stamped.header.frame_id
-
-        # copy the posture, approach and retreat from the grasp used
-        l.post_place_posture = self.pick_result.grasp.pre_grasp_posture
-        l.pre_place_approach = self.pick_result.grasp.pre_grasp_approach
-        l.post_place_retreat = self.pick_result.grasp.post_grasp_retreat
-        places.append(copy.deepcopy(l))
-        # create another several places, rotate each by 360/m degrees in yaw direction
-        m = 16 # number of possible place poses
-        pi = 3.141592653589
-        for i in range(0, m-1):
-            l.place_pose.pose = rotate_pose_msg_by_euler_angles(l.place_pose.pose, 0, 0, 2 * pi / m)
-            places.append(copy.deepcopy(l))
-
-        success, place_result = self.pickplace.place_with_retry(block.name,
-                                                                places,
-                                                                scene=self.scene)
-        return success
+    
+   
 
     def tuck(self):
         joints = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
@@ -269,8 +284,9 @@ class GazeboPoseMaster:
         obj_pose = self.pose_getter(obj_pose_req)
         
         #pdb.set_trace()
-        return np.array([obj_pose.pose.position.x,obj_pose.pose.position.y, obj_pose.pose.position.z, 
-                         obj_pose.pose.orientation.x, obj_pose.pose.orientation.y, obj_pose.pose.orientation.z, obj_pose.pose.orientation.w ])
+        return obj_pose
+        #return np.array([obj_pose.pose.position.x,obj_pose.pose.position.y, obj_pose.pose.position.z, 
+                #         obj_pose.pose.orientation.x, obj_pose.pose.orientation.y, obj_pose.pose.orientation.z, obj_pose.pose.orientation.w ])
     
 if __name__ == "__main__":
     # Create a node
@@ -292,32 +308,32 @@ if __name__ == "__main__":
 #
     # Move the base to be in front of the table
     # Demonstrates the use of the navigation stack
-##    rospy.loginfo("Setting initial pose")
-#    amcl.set_pose()
-##    rospy.loginfo("Moving to table...")
-#    move_base.goto(-0.46, 1.66, 1.57)
-#
-##    # Point the head at the cube we want to pick
-#    head_action.look_at(1, 0, 0, "base_link")
-#    
-#    print(gazebo_client.get_pose())
+#    rospy.loginfo("Setting initial pose")
+    amcl.set_pose()
+    rospy.loginfo("Moving to table...")
+    move_base.goto(-0.46, 1.66, 1.57)
+
+    # Point the head at the cube we want to pick
+    head_action.look_at(1, 0, 0, "base_link")
+    
+    grasping_client.pick(gazebo_client.get_pose())
     
 #
     # Get block to pick
-    while not rospy.is_shutdown():
-        rospy.loginfo("Picking object...")
-        grasping_client.updateScene()
-        cube, grasps = grasping_client.getGraspableCube()
-        #import pdb
-        pdb.set_trace()
-        if cube == None:
-            rospy.logwarn("Perception failed.")
-            continue
-
-        # Pick the block
-        if grasping_client.pick(cube, grasps):
-            break
-        rospy.logwarn("Grasping failed.")
+#    while not rospy.is_shutdown():
+#        rospy.loginfo("Picking object...")
+#        grasping_client.updateScene()
+#        cube, grasps = grasping_client.getGraspableCube()
+#        #import pdb
+#        pdb.set_trace()
+#        if cube == None:
+#            rospy.logwarn("Perception failed.")
+#            continue
+#
+#        # Pick the block
+#        if grasping_client.pick(cube, grasps):
+#            break
+#        rospy.logwarn("Grasping failed.")
 #
 #    # Tuck the arm
 #    grasping_client.tuck()
