@@ -1,0 +1,4 @@
+
+<launch>
+<node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /world /map 50"/>
+</launch>
