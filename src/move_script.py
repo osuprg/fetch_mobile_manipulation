@@ -26,12 +26,18 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from gazebo_msgs.srv import GetModelStateRequest, GetModelState
+from visualization_msgs.msg import Marker
 import pdb
 import moveit_commander
 import tf
 import sys
 
+import tf2_ros
+import tf2_geometry_msgs
+
 import numpy as np
+
+import time
 
 # Move base using navigation stack
 class MoveBaseClient(object):
@@ -91,9 +97,18 @@ class FollowTrajectoryClient(object):
 class PointHeadClient(object):
 
     def __init__(self):
-        self.client = actionlib.SimpleActionClient("head_controller/point_head", PointHeadAction)
+        
+        self.PAN_TILT_ACTION_NAME = 'head_controller/follow_joint_trajectory'
+        self.PAN_JOINT = 'head_pan_joint'
+        self.TILT_JOINT = 'head_tilt_joint'
+        self.PAN_TILT_TIME = 1.5
+        
+        self.client = actionlib.SimpleActionClient(self.PAN_TILT_ACTION_NAME, FollowJointTrajectoryAction)
         rospy.loginfo("Waiting for head_controller...")
         self.client.wait_for_server()
+        
+        
+
 
     def look_at(self, x = 1, y = 0, z = 0, frame = 'base_link', duration=1.0):
         goal = PointHeadGoal()
@@ -103,6 +118,21 @@ class PointHeadClient(object):
         goal.target.point.y = y
         goal.target.point.z = z
         goal.min_duration = rospy.Duration(duration)
+        self.client.send_goal(goal)
+        self.client.wait_for_result()
+        
+    def tilt_pan_head(self, pan = 0, tilt = 30): #input is in degrees
+        
+        pan = pan * np.pi / 180
+        tilt = tilt * np.pi / 180
+        
+        point = JointTrajectoryPoint()
+        point.positions = [pan, tilt]
+        point.time_from_start = rospy.Duration(self.PAN_TILT_TIME)
+        goal = FollowJointTrajectoryGoal()
+
+        goal.trajectory.joint_names = [self.PAN_JOINT, self.TILT_JOINT]
+        goal.trajectory.points.append(point)
         self.client.send_goal(goal)
         self.client.wait_for_result()
 
