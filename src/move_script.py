@@ -277,6 +277,24 @@ class GraspingClient(object):
             result = self.move_group.moveToJointPosition(joints, pose, 0.02)
             if result.error_code.val == MoveItErrorCodes.SUCCESS:
                 return
+            
+    def move_gripper_down(self, grasp_pose, depth = 0.25, avoid_collisions = False, eef_step = 0.001): #computes cartesian path and goes down by depth m
+        
+        waypoints = []
+        
+        waypoints.append(grasp_pose.pose)
+        target_pose = copy.deepcopy(grasp_pose)
+        
+        target_pose.pose.position.z -= depth
+        waypoints.append(target_pose.pose)
+        pdb.set_trace()
+        trajectory, fraction = self.group.compute_cartesian_path(waypoints, 0.01, 0, avoid_collisions)
+        pdb.set_trace()
+        self.group.execute(trajectory) #execute previously planned trajectory
+        pdb.set_trace()
+        
+        
+        
 
 class AmclPose:
     
