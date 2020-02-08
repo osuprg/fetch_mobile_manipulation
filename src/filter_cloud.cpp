@@ -33,35 +33,36 @@
      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZRGB>);
      pcl::fromROSMsg(*cloud_msg, *rgb_cloud);
      pcl::PCLPointCloud2 cloud_filtered_ros;
+
+     // Perform voxel downsampling
+      const float leaf_size_uniform = 0.01f;
+      pcl::VoxelGrid<pcl::PointXYZRGB> downsampler;
+      downsampler.setInputCloud (rgb_cloud);
+      downsampler.setLeafSize (leaf_size_uniform, leaf_size_uniform, leaf_size_uniform);
+      downsampler.filter (*rgb_cloud);
+
      // Convert to PCL data typek
 
-//     pcl::PassThrough<pcl::PointXYZRGB> pass;
-//     pass.setInputCloud (rgb_cloud);
-//     pass.setFilterFieldName ("r");
-//     pass.setFilterLimits (0,50);
-//     pass.filter (*cloud_filtered);
+     pcl::PassThrough<pcl::PointXYZRGB> pass;
+     pass.setInputCloud (rgb_cloud);
+     pass.setFilterFieldName ("y");
+     pass.setFilterLimits (-0.3, 2);
+     pass.filter (*rgb_cloud);
      //std::cout<<static_cast<unsigned int>(rgb_cloud->points[0].r)<<std::endl;
 
      pcl::ConditionalRemoval<pcl::PointXYZRGB> color_filter;
 
      pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr
-         red_condition(new pcl::PackedRGBComparison<pcl::PointXYZRGB>("g", pcl::ComparisonOps::LT, 90));
+         red_condition(new pcl::PackedRGBComparison<pcl::PointXYZRGB>("g", pcl::ComparisonOps::LT, 80));
      pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr color_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
      color_cond->addComparison (red_condition);
 //     //range_cond->addComparison (pcl::FieldComparison<PointT>::Ptr (new pcl::FieldComparison<PointT>("z", pcl::ComparisonOps::GT, 0.0)));
 //        // Build the filter
     color_filter.setInputCloud(rgb_cloud);
      color_filter.setCondition (color_cond);
-    color_filter.filter(*cloud_filtered);
+    color_filter.filter(*rgb_cloud);
 
-     // Perform the actual filtering
-//      pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-//      pcl:
-//      sor.setInputCloud (cloudPtr);
-//      sor.setLeafSize (0.02, 0.02, 0.02);
-//      sor.filter (cloud_filtered);
-
-     pcl::toPCLPointCloud2(*cloud_filtered, cloud_filtered_ros);
+     pcl::toPCLPointCloud2(*rgb_cloud, cloud_filtered_ros);
 
      cloud_filtered_ros.header.frame_id = "/head_camera_rgb_optical_frame";
      pcl_conversions::toPCL(ros::Time::now(), cloud_filtered_ros.header.stamp);
