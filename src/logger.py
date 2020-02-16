@@ -24,7 +24,7 @@ class CustomLogger:
         
         if column_list is None: #not provided by user
             columns = ['Navigation Start', 'Navigation End', 'Planning Start', 'Planning End'  \
-                   , 'Execution Start', 'Execution End', 'Success', 'Failure']
+                   , 'Execution Start', 'Execution End', 'Success']
         else:
             columns = column_list
         
@@ -56,9 +56,17 @@ class CustomLogger:
         
         return self._trial_number #returning new number if the caller wants it
     
+    def save(self, path = './run.pkl'):
+        
+        self._data.to_pickle(path)
+    
     def __str__(self):
         
         return str(self._data)
+    
+    
+        
+        
         
         
     
