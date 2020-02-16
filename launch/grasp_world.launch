@@ -16,10 +16,11 @@
     <arg name="world_name" value="worlds/grasp_table.world"/>
   </include>
 
-  <!-- Oh, you wanted a robot? -->
+  <!-- Oh, you wanted a robot? Already spawned by world file -->
   <include file="$(find fetch_gazebo)/launch/include/$(arg robot).launch.xml" />
 
-:
+   <node pkg="navr" type="broadcaster.py" name="odom_fake_publisher"/>
+
 
 
 </launch>
