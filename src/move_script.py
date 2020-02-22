@@ -11,6 +11,7 @@ import copy
 import actionlib
 import rospy
 
+from FetchGym import FetchGym
 from math import sin, cos
 from moveit_python import (MoveGroupInterface,
                            PlanningSceneInterface,
@@ -158,7 +159,8 @@ class GraspingClient(object):
 #        rospy.loginfo("Waiting for %s..." % find_topic)
 #        self.find_client = actionlib.SimpleActionClient(find_topic, FindGraspableObjectsAction)
 #        self.find_client.wait_for_server()
-        self.tf_buffer = tf2_ros.Buffer(rospy.Duration(10.0)) #tf buffer length
+        self.tf_buffer = tf2_ros.Buffer(rospy.Duration(1)) #tf buffer length
+        self.tf_buffer.clear()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         
         moveit_commander.roscpp_initialize(sys.argv)
@@ -219,13 +221,14 @@ class GraspingClient(object):
          logger.update_log('Planning Start')
          p1 = self.group.plan()
          logger.update_log('Planning End')
-         #pdb.set_trace()
+         pdb.set_trace()
          #print(p1)
          #log time after plan completed
          #log execution time start
          logger.update_log('Execution Start')
          self.group.go()
          #log execution time end
+         time.sleep(1)
          self.move_gripper_linearly(grasp_pose_in_base, avoid_collisions = False)
          logger.update_log('Execution End')
          #time.sleep(1)
@@ -414,44 +417,83 @@ class RvizMarkerPublish:
        self.publisher.publish(marker)
        
 
-if __name__ == "__main__":
-    # Create a node
-    rospy.init_node("demo")
-    
-    # Make sure sim time is working
-    while not rospy.Time.now():
-        pass
-    
-    amcl = AmclPose()
-    # Setup clients
-    move_base = MoveBaseClient()
-#    torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
-    head_action = PointHeadClient()
-    grasping_client = GraspingClient()
-#        
-    gazebo_client = GazeboPoseMaster()
+rospy.init_node("demo")
+
+   #Make sure sim time is working
+while not rospy.Time.now():
+    print('Waiting for ROS')
+    pass
 #    
-    pose_publisher =  RvizMarkerPublish()
+#env = FetchGym()
+
+#env.reset(pause = 15) #reset and wait for 'pause' seconds
+
+amcl = AmclPose()
+# Setup clients
+move_base = MoveBaseClient()
+torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
+head_action = PointHeadClient()
+grasping_client = GraspingClient()
+#    #        
+gazebo_client = GazeboPoseMaster()
+#    #    
+pose_publisher =  RvizMarkerPublish()
 
 ##
 #     Move the base to be in front of the table
-    rospy.loginfo("Setting initial pose")   
-    amcl.set_pose()
-    rospy.loginfo("Moving to table...")
-    move_base.goto(-0.40, 1.66, 1.57)
-##
+rospy.loginfo("Setting initial pose")   
+amcl.set_pose()
+rospy.loginfo("Moving to table...")
+move_base.goto(-0.40, 1.66, 1.57)
+###
 ###    # Point the head at the can we want to pick
-    #head_action.look_at(0.6, 0, 0, "base_link")
-#    rospy.sleep(3)
-    head_action.tilt_pan_head(pan = 0, tilt = 50)
-    
-    obj_pose = gazebo_client.get_pose()
-    time.sleep(1)
-    grasping_client.pick(obj_pose)
-#    pdb.set_trace()
-    
-    logger.update_log('Success', gazebo_client.check_grasp_success())
-    print(logger)
-    logger.save('./first_run.pkl')
-        
-    
+#head_action.look_at(0.6, 0, 0, "base_link")
+#        rospy.sleep(3)
+#        head_action.tilt_pan_head(pan = 0, tilt = 60)
+#        
+#        obj_pose = gazebo_client.get_pose()
+#        time.sleep(2)
+#        grasping_client.pick(obj_pose)
+#    #    pdb.set_trace()
+#        
+#        logger.update_log('Success', gazebo_client.check_grasp_success())
+#print(logger)
+
+#pdb.set_trace()
+#        grasping_client.tf_buffer.clear()
+#        pdb.set_trace()
+#        env.reset(pause = 10)
+#        #
+#        
+#        amcl = AmclPose()
+#        # Setup clients
+#        move_base = MoveBaseClient()
+#        torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
+#        head_action = PointHeadClient()
+#        grasping_client = GraspingClient()
+##    #        
+#        gazebo_client = GazeboPoseMaster()
+#    #    
+#        pose_publisher =  RvizMarkerPublish()
+#        
+#        
+#        rospy.loginfo("Setting initial pose")   
+#        amcl.set_pose()
+#        move_base.goto(-0.40, 1.66, 1.57)
+#        rospy.loginfo("Moving to table...")
+#        rospy.sleep(3)
+#        head_action.tilt_pan_head(pan = 0, tilt = 60)
+#        
+#        obj_pose = gazebo_client.get_pose()
+#        time.sleep(2)
+#        grasping_client.pick(obj_pose)
+##        
+#        env.close()
+#        
+#    finally:
+#        logger.save('./first_run.pkl')
+#        #`pdb.set_trace()
+#        #env.close()
+
+
+
