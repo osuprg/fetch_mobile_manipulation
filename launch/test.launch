@@ -1,0 +1,3 @@
+<launch>
+<node pkg="navr" type="move_script.py" name="grasping_trial"/>
+</launch>
