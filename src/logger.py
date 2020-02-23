@@ -23,8 +23,9 @@ class CustomLogger:
         self._trial_number = 0
         
         if column_list is None: #not provided by user
-            columns = ['Navigation Start', 'Navigation End', 'Planning Start', 'Planning End'  \
-                   , 'Execution Start', 'Execution End', 'Success']
+            columns = ['Base Planning Start', 'Base Planning End',
+                       'Base Navigation Start', 'Base Navigation End', 'Arm Planning Start', 'Arm Planning End'  \
+                   , 'Arm Execution Start', 'Arm Execution End', 'Success']
         else:
             columns = column_list
         

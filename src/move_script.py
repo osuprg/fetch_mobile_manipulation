@@ -70,11 +70,13 @@ class MoveBaseClient(object):
         #log send goal time
         #Log current pose
         #log target pose as well
+        logger.update_log('Base Planning Start')
         self.client.send_goal(move_goal)
-        logger.update_log('Navigation Start')
+        logger.update_log('Base Planning End')
+        logger.update_log('Base Navigation Start')
         
         self.client.wait_for_result()
-        logger.update_log('Navigation End')
+        logger.update_log('Base Navigation End')
         
         #log current pose
         #log current time
@@ -218,19 +220,19 @@ class GraspingClient(object):
          #log target pose in base
          #log current pose in base
          #log current time
-         logger.update_log('Planning Start')
+         logger.update_log('Arm Planning Start')
          p1 = self.group.plan()
-         logger.update_log('Planning End')
+         logger.update_log('Arm Planning End')
          #pdb.set_trace()
          #print(p1)
          #log time after plan completed
          #log execution time start
-         logger.update_log('Execution Start')
+         logger.update_log('Arm Execution Start')
          self.group.go()
          #log execution time end
          time.sleep(1)
          self.move_gripper_linearly(grasp_pose_in_base, avoid_collisions = False)
-         logger.update_log('Execution End')
+         logger.update_log('Arm Execution End')
          #time.sleep(1)
          self.gripper_open()
          #time.sleep(1)
