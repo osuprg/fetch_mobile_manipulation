@@ -14,6 +14,8 @@ import pandas as pd
 import numpy as np
 import datetime
 
+
+
 class CustomLogger:
     
     
@@ -22,9 +24,11 @@ class CustomLogger:
         self._preallocated_size = preallocated_size
         self._trial_number = 0
         
-        if column_list is None: #not provided by user
-            columns = ['Base Planning Start', 'Base Planning End',
-                       'Base Navigation Start', 'Base Navigation End', 'Arm Planning Start', 'Arm Planning End'  \
+        if column_list is None: #just ending with start/end means timestamp, otherwise position
+            columns = ['Base Planning Start', 'Base Planning End', 'Base Planning Goal', 
+                       'Base Navigation Start', 'Base Navigation End', 'Base Navigation Start Pose',
+                       'Base Navigation End Pose', 'Arm Planning Start', 'Arm Planning End',
+                       'Arm Execution Start Pose', 'Arm Execution End Pose'
                    , 'Arm Execution Start', 'Arm Execution End', 'Success']
         else:
             columns = column_list
@@ -36,7 +40,7 @@ class CustomLogger:
     def update_log(self, column_name, value = None): #updates column value, by default the current time
         
         
-        assert column_name in self._possible_columns, 'invalid column name! possible ones are {}'.format(self._possible_columns)
+        assert column_name in self._possible_columns, 'invalid column name {}! possible ones are {}'.format(column_name, self._possible_columns)
         
         if value is None:
             value = datetime.datetime.now()

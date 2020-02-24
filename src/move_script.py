@@ -70,13 +70,16 @@ class MoveBaseClient(object):
         #log send goal time
         #Log current pose
         #log target pose as well
+        logger.update_log('Base Planning Goal', np.array([x,y, theta])) #todo - resolve inconsistency
         logger.update_log('Base Planning Start')
+        logger.update_log('Base Navigation Start Pose', amcl.get_pose())
         self.client.send_goal(move_goal)
         logger.update_log('Base Planning End')
         logger.update_log('Base Navigation Start')
         
         self.client.wait_for_result()
         logger.update_log('Base Navigation End')
+        logger.update_log('Base Navigation End Pose', amcl.get_pose())
         
         #log current pose
         #log current time
@@ -221,6 +224,7 @@ class GraspingClient(object):
          #log current pose in base
          #log current time
          logger.update_log('Arm Planning Start')
+         
          p1 = self.group.plan()
          logger.update_log('Arm Planning End')
          #pdb.set_trace()
@@ -228,11 +232,14 @@ class GraspingClient(object):
          #log time after plan completed
          #log execution time start
          logger.update_log('Arm Execution Start')
+         logger.update_log('Arm Execution Start Pose', amcl.get_pose())
          self.group.go()
          #log execution time end
          time.sleep(1)
+         
          self.move_gripper_linearly(grasp_pose_in_base, avoid_collisions = False)
          logger.update_log('Arm Execution End')
+         logger.update_log('Arm Execution End Pose', amcl.get_pose())
          #time.sleep(1)
          self.gripper_open()
          #time.sleep(1)
@@ -358,6 +365,14 @@ class AmclPose:
         init_pose.pose.pose.orientation.w = 1
         
         self.pose_setter.publish(init_pose)
+        
+    def get_pose(self):
+        
+         pose_stamped = rospy.wait_for_message('/amcl_pose', PoseWithCovarianceStamped)
+         pdb.set_trace()
+         pose_val = pose_stamped.pose.pose
+         
+         return pose_val
         
 class GazeboPoseMaster:
     
