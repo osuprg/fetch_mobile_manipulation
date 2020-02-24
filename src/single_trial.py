@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 
+render = False #need gazebo gui?
 port=str(11311)
 port_gazebo=str(11312)
 single_trial_time = 60 #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
@@ -39,10 +40,15 @@ roslaunch.configure_logging(uuid)
 launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
 launch_gazebo.start()
 
+if not render:
+    os.system("killall -9 gzclient")
+
 rospy.sleep(10) #for fetch bringup
 
 launch_node = roslaunch.parent.ROSLaunchParent(uuid, [launch_node_path])
 launch_node.start()
+
+
 
 rospy.sleep(single_trial_time)
 
