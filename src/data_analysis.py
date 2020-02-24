@@ -17,8 +17,8 @@ data = []
 
 for file_idx in range(file_range[0], file_range[1] + 1):
     
-    data_part = pd.read_pickle('run_{}.pkl'.format(file_idx))
-    data.append(data_part[(data_part != 0).any(axis = 1)]) #remove all zero rows -- no data stored
+    data_part = pd.read_pickle('../logs/run_{}.pkl'.format(file_idx))
+    data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
    
 data = pd.concat(data, ignore_index = True)
 
