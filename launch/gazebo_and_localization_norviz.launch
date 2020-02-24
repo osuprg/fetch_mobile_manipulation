@@ -1,0 +1,63 @@
+<launch>
+  <arg name="robot" default="fetch"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+
+  <!-- Start Gazebo with a blank world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="world_name" value="worlds/grasp_table.world"/>
+  </include>
+
+  <!-- Oh, you wanted a robot? Already spawned by world file -->
+  <include file="$(find fetch_gazebo)/launch/include/$(arg robot).launch.xml" />
+
+   <node pkg="navr" type="broadcaster.py" name="odom_fake_publisher"/>
+
+  <!-- Navigation requires at least one map.
+       In addition, it is sometimes desirable to have a "keepout" map
+       which is used for costmaps, but not localization -->
+  <arg name="map_file" default="$(find navr)/maps/grasp_map_perfect.yaml" />
+  <arg name="map_keepout_file" default="$(find fetch_maps)/maps/3_1_16_keepout.yaml" />
+  <arg name="use_keepout" default="false" />
+
+  <!-- Navigation parameter files -->
+  <arg name="move_base_include" default="$(find fetch_navigation)/launch/include/move_base.launch.xml" />
+  <arg name="amcl_include" default="$(find fetch_navigation)/launch/include/amcl.launch.xml" />
+  
+  <!--world and map are aligned for fake odometry -->
+  <!--<node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /world /map 50"/>-->
+  <!-- serve up a map -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- serve up a map with keepout zones -->
+  <group if="$(arg use_keepout)" >
+  <node name="map_keepout_server" pkg="map_server" type="map_server" args="$(arg map_keepout_file)" >
+    <remap from="map" to="map_keepout" />
+    <remap from="static_map" to="static_map_keepout" />
+  </node>
+  </group>
+
+  <!-- localize the robot -->
+  <include file="$(arg amcl_include)" />
+
+  <!-- move the robot -->
+  <include file="$(arg move_base_include)" >
+    <arg name="name" value="fetch" />
+    <arg if="$(arg use_keepout)" name="map_topic" value="map_keepout" />
+  </include>
+
+  <!-- tilt the head -->
+  <node pkg="fetch_navigation" type="tilt_head.py" name="tilt_head_node" />
+  
+   <!-- Start MoveIt -->
+  <include file="$(find fetch_moveit_config)/launch/move_group.launch" >
+    <arg name="info" value="true"/><!-- publish grasp markers -->
+  </include>
+
+</launch>
