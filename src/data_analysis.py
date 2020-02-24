@@ -10,18 +10,20 @@ import pandas as pd
 import numpy as np
 
 
-file_range = [1, 10]
-
-#for file_idx in range(file_range[0], file_range[1]):
-    
-    
-    
+file_range = [1, 20]
 
 
-data = pd.read_pickle('run_1.pkl')
-data = data[(data != 0).any(axis = 1)] #remove all zero rows -- no data stored
+data = []
+
+for file_idx in range(file_range[0], file_range[1] + 1):
+    
+    data_part = pd.read_pickle('run_{}.pkl'.format(file_idx))
+    data.append(data_part[(data_part != 0).any(axis = 1)]) #remove all zero rows -- no data stored
+   
+data = pd.concat(data, ignore_index = True)
+
+
 log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
-#
 
 for task in log_durations:
     
