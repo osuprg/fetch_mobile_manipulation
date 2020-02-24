@@ -16,7 +16,7 @@ import time
 render = False #need gazebo gui?
 port=str(11311)
 port_gazebo=str(11312)
-single_trial_time = 60 #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
+single_trial_time = 50 #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
 
 os.environ["ROS_MASTER_URI"] = "http://localhost:"+ port
 os.environ["GAZEBO_MASTER_URI"] = "http://localhost:"+ port_gazebo
@@ -31,7 +31,7 @@ os.system("killall -9 gzserver")
 
 rospy.init_node('trials')
 
-launch_gazebo_path = "/home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch"
+launch_gazebo_path = "/home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization_norviz.launch"
 launch_node_path = "/home/sritee/catkin_ws/src/navr/launch/test.launch"
 
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)

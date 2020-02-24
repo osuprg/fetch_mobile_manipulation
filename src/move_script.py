@@ -423,12 +423,12 @@ def shutdown_process():
     cnt = 1
     import os
     #pdb.set_trace()
-    while os.path.exists('/home/sritee/catkin_ws/src/navr/src/run_' + str(cnt) + '.pkl'):
+    while os.path.exists('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl'):
     #pdb.set_trace()
         cnt+=1
     #pdb.set_trace()    
     rospy.loginfo("Saving Log file")
-    logger.save('/home/sritee/catkin_ws/src/navr/src/run_' + str(cnt) + '.pkl')     
+    logger.save('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl')     
        
 
 rospy.init_node("demo")
@@ -451,8 +451,8 @@ rospy.loginfo("Setting initial pose")
 amcl.set_pose()
 rospy.loginfo("Moving to table...")
 move_base.goto(-0.40, 1.66, 1.57)
-rospy.sleep(3)
-head_action.tilt_pan_head(pan = 0, tilt = 60)
+#rospy.sleep(3)
+#head_action.tilt_pan_head(pan = 0, tilt = 60)
 
 obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
