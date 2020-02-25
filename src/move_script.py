@@ -443,8 +443,32 @@ def shutdown_process():
         cnt+=1
     #pdb.set_trace()    
     rospy.loginfo("Saving Log file")
-    logger.save('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl')     
+    logger.save('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl')
+    
+    
+def sample_valid_navigation_goal(publish_goal_marker = True):
+    
+    #TODO -  currently this function has hardcoded sample bounds. Make it map specific
+    #pose angle theta is also fixed.
+    
+    x_bounds = [0, -0.5]
+    y_bounds = [1.55, 1.7]
+    theta = 1.57 #currently dixed
+    
+    x_val = np.random.uniform(low = x_bounds[0], high = x_bounds[1])
+    y_val =  np.random.uniform(low = y_bounds[0], high = y_bounds[1])
+    
+    if publish_goal_marker:
+        
+        goal_pose = PoseStamped()
+        goal_pose.pose.position.x = x_val
+        goal_pose.pose.position.y = y_val
+        pose_publisher.publish(goal_pose)
+   
+    return [x_val, y_val, theta]
+    
        
+sample_random_nav_goal = True
 
 rospy.init_node("demo")
 rospy.on_shutdown(shutdown_process)
@@ -465,7 +489,13 @@ pose_publisher =  RvizMarkerPublish()
 rospy.loginfo("Setting initial pose")   
 amcl.set_pose()
 rospy.loginfo("Moving to table...")
-move_base.goto(-0.40, 1.66, 1.57)
+if sample_random_nav_goal:
+    nav_goal = sample_valid_navigation_goal()
+else:
+    nav_goal = [-0.40, 1.66, 1.57]
+#pdb.set_trace()
+move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
+#pdb.set_trace()
 #rospy.sleep(3)
 #head_action.tilt_pan_head(pan = 0, tilt = 60)
 
