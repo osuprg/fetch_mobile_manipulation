@@ -27,7 +27,8 @@ class CustomLogger:
         if column_list is None: #just ending with start/end means timestamp, otherwise position
             columns = ['Base Planning Start', 'Base Planning End', 'Base Planning Goal', 
                        'Base Navigation Start', 'Base Navigation End', 'Base Navigation Start Pose',
-                       'Base Navigation End Pose', 'Arm Planning Start', 'Arm Planning End',
+                       'Base Navigation End Pose', 'Arm Planning Start', 'Arm Planning End', 
+                        'Arm Planning Success',
                        'Arm Execution Start Pose', 'Arm Execution End Pose'
                    , 'Arm Execution Start', 'Arm Execution End', 'Success']
         else:

@@ -66,7 +66,6 @@ class MoveBaseClient(object):
         
         move_goal.target_pose.header.frame_id = frame
         move_goal.target_pose.header.stamp = rospy.Time.now()
-
         #log send goal time
         #Log current pose
         #log target pose as well
@@ -76,7 +75,6 @@ class MoveBaseClient(object):
         self.client.send_goal(move_goal)
         logger.update_log('Base Planning End')
         logger.update_log('Base Navigation Start')
-        
         self.client.wait_for_result()
         logger.update_log('Base Navigation End')
         logger.update_log('Base Navigation End Pose', amcl.get_pose())
@@ -227,6 +225,7 @@ class GraspingClient(object):
          
          p1 = self.group.plan()
          logger.update_log('Arm Planning End')
+         logger.update_log('Arm Planning Success', bool(p1.joint_trajectory.points))
          #pdb.set_trace()
          #print(p1)
          #log time after plan completed
@@ -236,11 +235,12 @@ class GraspingClient(object):
          self.group.go()
          #log execution time end
          time.sleep(1)
-         
+         if not p1.joint_trajectory.points:
+             return
          self.move_gripper_linearly(grasp_pose_in_base, avoid_collisions = False)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
-         #time.sleep(1)
+         time.sleep(1)
          self.gripper_open()
          #time.sleep(1)
          #self.gripper_close()
@@ -369,7 +369,7 @@ class AmclPose:
     def get_pose(self):
         
          pose_stamped = rospy.wait_for_message('/amcl_pose', PoseWithCovarianceStamped)
-         pdb.set_trace()
+         #pdb.set_trace()
          pose_val = pose_stamped.pose.pose
          
          return pose_val
