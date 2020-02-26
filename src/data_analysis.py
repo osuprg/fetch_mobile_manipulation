@@ -25,6 +25,9 @@ data = pd.concat(data, ignore_index = True)
 
 log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
 
+data['Arm Execution Failure'] = data['Arm Execution End'] == 0
+data.loc[data['Arm Execution End'] == 0, 'Arm Execution End'] = datetime.datetime.now() #just set it to current time, means fail
+
 for task in log_durations:
     
     data[task + ' Duration'] = (data[task + ' End' ] - data[task + ' Start'])
