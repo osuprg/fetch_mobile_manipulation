@@ -21,7 +21,7 @@ def publish_odom(msg):
                      "odom")
 
 if __name__ == '__main__':
-    rospy.init_node('odom_fake_publisher')
+    rospy.init_node('odom_fake_publisher', anonymous = True)
     rospy.Subscriber('odom_fake', 
                      Odometry,
                      publish_odom)

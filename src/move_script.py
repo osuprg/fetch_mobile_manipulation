@@ -470,7 +470,8 @@ def sample_valid_navigation_goal(publish_goal_marker = True):
        
 sample_random_nav_goal = True
 
-rospy.init_node("demo")
+      
+rospy.init_node("demo", anonymous = True)
 rospy.on_shutdown(shutdown_process)
 
 amcl = AmclPose()
