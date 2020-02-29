@@ -41,9 +41,18 @@ import numpy as np
 import datetime
 import pandas as pd
 from logger import CustomLogger
+import ConfigParser
 
 logger = CustomLogger()
-
+config = ConfigParser.ConfigParser()
+config.read('/home/sritee/catkin_ws/src/navr/config/params.yaml')
+experiment_section_name = 'experiment_section'
+sample_random_nav_goal = bool(config.get(experiment_section_name, 'sample_random_nav_goal'))
+x_low = float(config.get(experiment_section_name, 'sample_xlow'))
+x_high = float(config.get(experiment_section_name, 'sample_xhigh'))
+y_low = float(config.get(experiment_section_name, 'sample_ylow'))
+y_high = float(config.get(experiment_section_name, 'sample_yhigh'))
+#pdb.set_trace()
 # Move base using navigation stack
 class MoveBaseClient(object):
 
@@ -451,12 +460,10 @@ def sample_valid_navigation_goal(publish_goal_marker = True):
     #TODO -  currently this function has hardcoded sample bounds. Make it map specific
     #pose angle theta is also fixed.
     
-    x_bounds = [0, -0.5]
-    y_bounds = [1.55, 1.7]
     theta = 1.57 #currently dixed
     
-    x_val = np.random.uniform(low = x_bounds[0], high = x_bounds[1])
-    y_val =  np.random.uniform(low = y_bounds[0], high = y_bounds[1])
+    x_val = np.random.uniform(low = x_low , high = x_high)
+    y_val =  np.random.uniform(low = y_low, high = y_high)
     
     if publish_goal_marker:
         
@@ -466,10 +473,6 @@ def sample_valid_navigation_goal(publish_goal_marker = True):
         pose_publisher.publish(goal_pose)
    
     return [x_val, y_val, theta]
-    
-       
-sample_random_nav_goal = True
-
       
 rospy.init_node("demo", anonymous = True)
 rospy.on_shutdown(shutdown_process)

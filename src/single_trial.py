@@ -12,11 +12,22 @@ import os
 import subprocess
 import sys
 import time
+import ConfigParser
 
-render = False #need gazebo gui?
+config = ConfigParser.ConfigParser()
+config.read('../config/params.yaml')
+
+gazebo_section_name = 'gazebo'
+
+render = bool(config.get(gazebo_section_name, 'render'))
+single_trial_time = int(config.get(gazebo_section_name, 'experiment_duration')) #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
+fetch_bringup_time = int(config.get(gazebo_section_name, 'sleep_time_after_fetchspawn'))
+launch_gazebo_path = config.get(gazebo_section_name, 'gazebo_launch')
+launch_node_path = config.get(gazebo_section_name, 'move_script')
+
 port=str(11311)
 port_gazebo=str(11312)
-single_trial_time = 50 #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
+
 
 os.environ["ROS_MASTER_URI"] = "http://localhost:"+ port
 os.environ["GAZEBO_MASTER_URI"] = "http://localhost:"+ port_gazebo
@@ -31,8 +42,6 @@ os.system("killall -9 gzserver")
 
 rospy.init_node('trials')
 
-launch_gazebo_path = "/home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization_norviz.launch"
-launch_node_path = "/home/sritee/catkin_ws/src/navr/launch/test.launch"
 
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
@@ -43,12 +52,10 @@ launch_gazebo.start()
 if not render:
     os.system("killall -9 gzclient")
 
-rospy.sleep(10) #for fetch bringup
+rospy.sleep(fetch_bringup_time) #for fetch bringup
 
 launch_node = roslaunch.parent.ROSLaunchParent(uuid, [launch_node_path])
 launch_node.start()
-
-
 
 rospy.sleep(single_trial_time)
 
