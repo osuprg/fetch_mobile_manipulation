@@ -11,11 +11,7 @@ import copy
 import actionlib
 import rospy
 
-from FetchGym import FetchGym
 from math import sin, cos
-from moveit_python import (MoveGroupInterface,
-                           PlanningSceneInterface,
-                           PickPlaceInterface)
 #from moveit_python.geometry import rotate_pose_msg_by_euler_angles
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
