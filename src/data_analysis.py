@@ -43,20 +43,22 @@ for task in log_durations:
     data[task + ' Duration'] = data[task + ' Duration'].apply(lambda k : k.total_seconds())
 
 
-pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = False)
-visualized_data, occurances = utils.get_vis_times(pose_with_times, x_low = x_range[0], x_high = x_range[1], 
-                                                  y_low = y_range[0], y_high = y_range[1], num_bins = 7)
-
-visualized_data[np.isnan(visualized_data)] = np.nanmax(visualized_data) #make nan as the max time color
-
-visualized_data = visualized_data[1:, 1:] #drop boundaries
-visualized_data_norm = visualized_data/np.max(visualized_data) #lighter means lesser time
-
-
-
-plt.imshow(1 - visualized_data_norm)
+pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = True)
+#visualized_data, occurances = utils.get_vis_times(pose_with_times, x_low = x_range[0], x_high = x_range[1], 
+#                                                  y_low = y_range[0], y_high = y_range[1], num_bins = 7)
+#
+#visualized_data[np.isnan(visualized_data)] = np.nanmax(visualized_data) #make nan as the max time color
+#
+#visualized_data = visualized_data[1:, 1:] #drop boundaries
+#visualized_data_norm = visualized_data/np.max(visualized_data) #lighter means lesser time
+#
+#
+#
+#plt.imshow(1 - visualized_data_norm)
 
 #data.to_csv('../logs_random/results.csv')
+
+plt.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1])
 
 '''
 Available columns for reference
