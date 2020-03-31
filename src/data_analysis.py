@@ -13,6 +13,7 @@ import numpy as np
 import datetime
 import utils
 import matplotlib.patches as patches
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 file_range = [1, 200]
 filter_arm_failure = True
@@ -72,24 +73,29 @@ pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time 
 norm_times = pose_with_times[:, -1]/np.max(pose_with_times[:, -1])
 fig = plt.figure(figsize = (20, 20))
 
+fontsize = 40
 ax = fig.add_subplot(1, 1, 1)
-ax.set_xlim(x_range[0] - 0.6, x_range[1])
+ax.set_xlim(x_range[0] - 0.3, x_range[1])
 ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
-ax.set_xlabel('xaxis (metres)')
-ax.set_ylabel('yaxis (metres)')
+ax.set_xlabel('X values (metres)', fontsize = fontsize)
+ax.set_ylabel('Y values (metres)', fontsize = fontsize)
 
-ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = norm_times, s = 500)
-#ax.subplot()
-#ax2 = fig.add_subplot(2, 1, 1)
-#ax2.set_xlim(x_range[0], x_range[1])
-#ax2.set_ylim(y_range[1], y_range[1])
-scatter = ax.scatter(can_pose[0], can_pose[1], c = 'r', marker = 'x')
+scatter = ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1], s = 500)
+
+ax.scatter(can_pose[0], can_pose[1], c = 'r', marker = 'x', s = 1000)
 rect = patches.Rectangle((table_pose[0],table_pose[1]),table_size[0], table_size[1],linewidth=1,edgecolor='r',facecolor='none')
 ax.add_patch(rect)
-#fig.colorbar(scatter, ax = ax)
+ax.set_title('Pose vs (Arm Execution + Planning Times) for 200 runs', fontsize = fontsize)
+
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='5%', pad=0.05)
+#cax.set_ylabel('Time in Seconds for Execution and Planning')
+
+
+cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
+cbar.set_label('Time in Seconds', fontsize = fontsize)
 
 #mpl.colorbar.ColorbarBase(ax2, norm = mpl.colors.Normalize(np.min(pose_with_times[:, -1]), np.max(pose_with_times[:, -1])))
-
 fig.show()
 
 '''
