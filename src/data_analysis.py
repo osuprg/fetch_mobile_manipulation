@@ -8,11 +8,13 @@ Created on Sat Feb 22 18:58:58 2020
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 import datetime
 import utils
+import matplotlib.patches as patches
 
-file_range = [1, 100]
+file_range = [1, 200]
 filter_arm_failure = True
 x_range = [-0.5, 0]
 y_range = [1.55, 1.7]
@@ -20,9 +22,14 @@ y_range = [1.55, 1.7]
 
 data = []
 
+can_pose = [-0.27, 2.25]
+
+table_size = [0.85, 0.25]
+table_pose = [-0.49 - table_size[0]/2, 2.1]
+
 for file_idx in range(file_range[0], file_range[1] + 1):
     
-    data_part = pd.read_pickle('../logs_random/run_{}.pkl'.format(file_idx))
+    data_part = pd.read_pickle('../logs_200_random/run_{}.pkl'.format(file_idx))
     data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
    
 data = pd.concat(data, ignore_index = True)
@@ -42,8 +49,8 @@ for task in log_durations:
     #print(task)
     data[task + ' Duration'] = data[task + ' Duration'].apply(lambda k : k.total_seconds())
 
-
-pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = True)
+data_ = data[data['Arm Execution Duration'] < 20]
+pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = False)
 #visualized_data, occurances = utils.get_vis_times(pose_with_times, x_low = x_range[0], x_high = x_range[1], 
 #                                                  y_low = y_range[0], y_high = y_range[1], num_bins = 7)
 #
@@ -58,7 +65,32 @@ pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time 
 
 #data.to_csv('../logs_random/results.csv')
 
-plt.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1])
+
+
+#plt.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1])
+
+norm_times = pose_with_times[:, -1]/np.max(pose_with_times[:, -1])
+fig = plt.figure(figsize = (20, 20))
+
+ax = fig.add_subplot(1, 1, 1)
+ax.set_xlim(x_range[0] - 0.6, x_range[1])
+ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
+ax.set_xlabel('xaxis (metres)')
+ax.set_ylabel('yaxis (metres)')
+
+ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = norm_times, s = 500)
+#ax.subplot()
+#ax2 = fig.add_subplot(2, 1, 1)
+#ax2.set_xlim(x_range[0], x_range[1])
+#ax2.set_ylim(y_range[1], y_range[1])
+scatter = ax.scatter(can_pose[0], can_pose[1], c = 'r', marker = 'x')
+rect = patches.Rectangle((table_pose[0],table_pose[1]),table_size[0], table_size[1],linewidth=1,edgecolor='r',facecolor='none')
+ax.add_patch(rect)
+#fig.colorbar(scatter, ax = ax)
+
+#mpl.colorbar.ColorbarBase(ax2, norm = mpl.colors.Normalize(np.min(pose_with_times[:, -1]), np.max(pose_with_times[:, -1])))
+
+fig.show()
 
 '''
 Available columns for reference
