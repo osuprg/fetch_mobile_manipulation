@@ -524,11 +524,12 @@ move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 #pdb.set_trace()
 #rospy.sleep(3)
 #head_action.tilt_pan_head(pan = 0, tilt = 60)
-
+obj_pose_before = gazebo_client.get_pose('coke_can')
 obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
 
 logger.update_log('Success', gazebo_client.check_grasp_success())
+logger.update_log('Can Pose', obj_pose_before)
 
 
 

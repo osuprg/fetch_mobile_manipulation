@@ -30,7 +30,7 @@ class CustomLogger:
                        'Base Navigation End Pose', 'Arm Planning Start', 'Arm Planning End', 
                         'Arm Planning Success',
                        'Arm Execution Start Pose', 'Arm Execution End Pose'
-                   , 'Arm Execution Start', 'Arm Execution End', 'Success']
+                   , 'Arm Execution Start', 'Arm Execution End', 'Success', 'Can Pose']
         else:
             columns = column_list
         
