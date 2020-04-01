@@ -465,6 +465,8 @@ def shutdown_process():
     cnt = 1
     import os
     #pdb.set_trace()
+    if not os.path.exists('/home/sritee/catkin_ws/src/navr/logs'):
+        os.mkdir('/home/sritee/catkin_ws/src/navr/logs')
     while os.path.exists('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl'):
     #pdb.set_trace()
         cnt+=1
