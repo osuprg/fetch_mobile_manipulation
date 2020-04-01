@@ -10,7 +10,7 @@ This is a temporary script file.
 import copy
 import actionlib
 import rospy
-
+import copy
 from math import sin, cos
 #from moveit_python.geometry import rotate_pose_msg_by_euler_angles
 
@@ -23,6 +23,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from gazebo_msgs.srv import GetModelStateRequest, GetModelState
+from gazebo_msgs.srv import SetModelStateRequest, SetModelState
 from visualization_msgs.msg import Marker
 import pdb
 import moveit_commander
@@ -381,10 +382,12 @@ class AmclPose:
         
 class GazeboPoseMaster:
     
-    def __init__(self, get_pose_srv_name = 'gazebo/get_model_state'):
+    def __init__(self, get_pose_srv_name = 'gazebo/get_model_state', set_pose_srv_name = 'gazebo/set_model_state'):
         
         self.get_pose_srv_name = get_pose_srv_name
+        self.set_pose_srv_name = set_pose_srv_name
         self.pose_getter = rospy.ServiceProxy(self.get_pose_srv_name, GetModelState)
+        self.pose_setter = rospy.ServiceProxy(self.set_pose_srv_name, SetModelState)
 
     def get_pose(self, object_name = 'coke_can'):
         
@@ -412,7 +415,26 @@ class GazeboPoseMaster:
         success =  height > height_threshold
         
         return success
-       
+    
+    def set_pose_relative(self, object_name = 'coke_can', relative_x = 0, relative_y = 0, relative_z = 0):
+        """
+        For now, this sets the pose relative to the can default pose in gazebo, only position supported
+        """
+        
+        obj_pose_req = SetModelStateRequest()
+
+        obj_pose_req.model_state.model_name = object_name
+    
+        obj_cur_pose = self.get_pose()
+        obj_next_pose = copy.deepcopy(obj_cur_pose.pose)
+        obj_next_pose.position.x += relative_x
+        obj_next_pose.position.y += relative_y
+        obj_next_pose.position.z += relative_z
+        rospy.wait_for_service(self.set_pose_srv_name)
+        
+        obj_pose_req.model_state.pose = obj_next_pose
+        self.pose_setter(obj_pose_req)
+        
 class RvizMarkerPublish:
     
 
@@ -493,7 +515,9 @@ if sample_random_nav_goal:
     nav_goal = sample_valid_navigation_goal()
 else:
     nav_goal = [-0.40, 1.66, 1.57]
-#pdb.set_trace()
+
+#gazebo_client.set_pose_relative('coke_can', -0.3, 0, 0)
+
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 #pdb.set_trace()
 #rospy.sleep(3)
