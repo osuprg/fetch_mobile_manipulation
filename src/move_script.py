@@ -43,12 +43,13 @@ import ConfigParser
 logger = CustomLogger()
 config = ConfigParser.ConfigParser()
 config.read('/home/sritee/catkin_ws/src/navr/config/params.yaml')
+
 experiment_section_name = 'experiment_section'
-sample_random_nav_goal = bool(config.get(experiment_section_name, 'sample_random_nav_goal'))
 x_low = float(config.get(experiment_section_name, 'sample_xlow'))
 x_high = float(config.get(experiment_section_name, 'sample_xhigh'))
 y_low = float(config.get(experiment_section_name, 'sample_ylow'))
 y_high = float(config.get(experiment_section_name, 'sample_yhigh'))
+sample_random_nav_goal = (config.get(experiment_section_name, 'sample_random_nav_goal') == 'True')
 #pdb.set_trace()
 # Move base using navigation stack
 class MoveBaseClient(object):

@@ -19,7 +19,8 @@ config.read('../config/params.yaml')
 
 gazebo_section_name = 'gazebo'
 
-render = bool(config.get(gazebo_section_name, 'render'))
+#TODO -- use config.getint etc
+render = (config.get(gazebo_section_name, 'render') == 'True')
 single_trial_time = int(config.get(gazebo_section_name, 'experiment_duration')) #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
 fetch_bringup_time = int(config.get(gazebo_section_name, 'sleep_time_after_fetchspawn'))
 launch_gazebo_path = config.get(gazebo_section_name, 'gazebo_launch')
