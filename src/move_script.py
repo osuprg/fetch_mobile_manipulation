@@ -45,11 +45,21 @@ config = ConfigParser.ConfigParser()
 config.read('/home/sritee/catkin_ws/src/navr/config/params.yaml')
 
 experiment_section_name = 'experiment_section'
-x_low = float(config.get(experiment_section_name, 'sample_xlow'))
-x_high = float(config.get(experiment_section_name, 'sample_xhigh'))
-y_low = float(config.get(experiment_section_name, 'sample_ylow'))
-y_high = float(config.get(experiment_section_name, 'sample_yhigh'))
 sample_random_nav_goal = (config.get(experiment_section_name, 'sample_random_nav_goal') == 'True')
+
+#TODO -- use config.getfloat, config.getint etc
+can_offset_x = float(config.get(experiment_section_name, 'can_offset_x'))
+can_offset_y = float(config.get(experiment_section_name, 'can_offset_y'))
+
+x_low = float(config.get(experiment_section_name, 'sample_xlow')) + can_offset_x
+x_high = float(config.get(experiment_section_name, 'sample_xhigh'))  + can_offset_x
+y_low = float(config.get(experiment_section_name, 'sample_ylow'))  + can_offset_y
+y_high = float(config.get(experiment_section_name, 'sample_yhigh'))  + can_offset_y
+
+default_nav_goal = [-0.40, 1.66, 1.57]
+default_nav_goal[0] += can_offset_x
+default_nav_goal[1] += can_offset_y
+
 #pdb.set_trace()
 # Move base using navigation stack
 class MoveBaseClient(object):
@@ -516,10 +526,11 @@ amcl.set_pose()
 rospy.loginfo("Moving to table...")
 if sample_random_nav_goal:
     nav_goal = sample_valid_navigation_goal()
+    print('RANDOM GOAL')
 else:
-    nav_goal = [-0.40, 1.66, 1.57]
+    nav_goal = default_nav_goal
 
-#gazebo_client.set_pose_relative('coke_can', -0.3, 0, 0)
+gazebo_client.set_pose_relative('coke_can', can_offset_x, can_offset_y, 0)
 
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 #pdb.set_trace()
