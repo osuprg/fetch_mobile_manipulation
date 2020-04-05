@@ -14,23 +14,40 @@ import datetime
 import utils
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import os
+import matplotlib
 
-file_range = [1, 200]
 filter_arm_failure = True
-x_range = [-0.5, 0]
+success_plot = False
+grasping_only_plot = True
+navigation_and_grasping_plot = False
+clip_times = True #clip within predefined range
+
+dir_name = 'logs_33_constant_singlecanpose'
+num_runs = len(os.listdir('../' + dir_name))
+
+
+assert sum([success_plot, grasping_only_plot, navigation_and_grasping_plot]) == 1, 'only one value should be true'
+assert(num_runs > 0)
+
+file_range = [1, num_runs]
+
+x_range = [-0.4, 0.1]
 y_range = [1.55, 1.7]
 
-
-data = []
+time_range = [5, 12] #this is the range at which we will normalize  and clip the times to
 
 can_pose = [-0.27, 2.25]
 
 table_size = [0.85, 0.25]
 table_pose = [-0.49 - table_size[0]/2, 2.1]
 
+fontsize = 40
+
+data = []
 for file_idx in range(file_range[0], file_range[1] + 1):
     
-    data_part = pd.read_pickle('../logs_200_random/run_{}.pkl'.format(file_idx))
+    data_part = pd.read_pickle('../{}/run_{}.pkl'.format(dir_name, file_idx))
     data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
    
 data = pd.concat(data, ignore_index = True)
@@ -50,52 +67,28 @@ for task in log_durations:
     #print(task)
     data[task + ' Duration'] = data[task + ' Duration'].apply(lambda k : k.total_seconds())
 
-data_ = data[data['Arm Execution Duration'] < 20]
+#data_ = data[data['Arm Execution Duration'] < 20]
+    
+
 pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = False)
-#visualized_data, occurances = utils.get_vis_times(pose_with_times, x_low = x_range[0], x_high = x_range[1], 
-#                                                  y_low = y_range[0], y_high = y_range[1], num_bins = 7)
-#
-#visualized_data[np.isnan(visualized_data)] = np.nanmax(visualized_data) #make nan as the max time color
-#
-#visualized_data = visualized_data[1:, 1:] #drop boundaries
-#visualized_data_norm = visualized_data/np.max(visualized_data) #lighter means lesser time
-#
-#
-#
-#plt.imshow(1 - visualized_data_norm)
 
-#data.to_csv('../logs_random/results.csv')
+times_clipped = np.clip(pose_with_times[:, -1], time_range[0], time_range[1])
 
-
-
-#plt.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1])
-
-norm_times = pose_with_times[:, -1]/np.max(pose_with_times[:, -1])
 fig = plt.figure(figsize = (20, 20))
 
-fontsize = 40
 ax = fig.add_subplot(1, 1, 1)
-ax.set_xlim(x_range[0] - 0.3, x_range[1])
-ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
-ax.set_xlabel('X values (metres)', fontsize = fontsize)
-ax.set_ylabel('Y values (metres)', fontsize = fontsize)
 
-scatter = ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = pose_with_times[:, -1], s = 500)
+scatter = ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = times_clipped, cmap = matplotlib.cm.coolwarm_r,  s = 500)
 
-ax.scatter(can_pose[0], can_pose[1], c = 'r', marker = 'x', s = 1000)
-rect = patches.Rectangle((table_pose[0],table_pose[1]),table_size[0], table_size[1],linewidth=1,edgecolor='r',facecolor='none')
-ax.add_patch(rect)
-ax.set_title('Pose vs (Arm Execution + Planning Times) for 200 runs', fontsize = fontsize)
+utils.add_limits_and_labels_to_axes(ax, x_range, y_range, x_title
+                                    = 'X val', y_title = 'Y val', fontsize = 40, 
+                                    title = 'Pose vs Time for {} runs'.format(num_runs))
 
-divider = make_axes_locatable(ax)
-cax = divider.append_axes('right', size='5%', pad=0.05)
-#cax.set_ylabel('Time in Seconds for Execution and Planning')
+utils.add_can_and_table_to_axes(ax, can_pose, table_pose, table_size)
+
+utils.add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40)
 
 
-cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
-cbar.set_label('Time in Seconds', fontsize = fontsize)
-
-#mpl.colorbar.ColorbarBase(ax2, norm = mpl.colors.Normalize(np.min(pose_with_times[:, -1]), np.max(pose_with_times[:, -1])))
 fig.show()
 
 '''

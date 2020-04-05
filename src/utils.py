@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from tf.transformations import euler_from_quaternion as quat_to_euler
-
+import matplotlib.patches as patches
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def pose_to_array(pose, orientation = False):
@@ -61,6 +62,36 @@ def get_vis_times(pose_with_times, x_low = -0.5, x_high = 0, y_low = 1.55, y_hig
     time_val[:, :, 0]/= time_val[:, :, 1]
     
     return time_val[:, :, 0].copy(), time_val[:, :, 1].copy()
+
+
+def add_can_and_table_to_axes(ax, can_pose, table_pose, table_size):
+    
+    ax.scatter(can_pose[0], can_pose[1], c = 'r', marker = 'x', s = 1000)
+    rect = patches.Rectangle((table_pose[0],table_pose[1]),table_size[0], table_size[1],linewidth=1,edgecolor='r',facecolor='none')
+    ax.add_patch(rect)
+    
+def add_limits_and_labels_to_axes(ax, x_range, y_range, x_title, y_title, fontsize = 40, title = 'Pose vs Times'):
+    
+    ax.set_title(title, fontsize = fontsize)
+    ax.set_xlim(x_range[0] - 0.3, x_range[1])
+    ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
+    ax.set_xlabel('X values (metres)', fontsize = fontsize)
+    ax.set_ylabel('Y values (metres)', fontsize = fontsize)
+    
+def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
+    
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes('right', size='5%', pad=0.05)
+    
+    cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
+    cbar.set_label(label, fontsize = fontsize)
+    
+
+#def make_hist_plot(data, column = 'Arm Times', title = 'Arm Execution Histogram',
+#                   xlabel = 'Time in Seconds for Planning and Execution', 
+#                   ylabel = 'Frequency'):
+    
+    
     
 
         
