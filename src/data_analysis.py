@@ -23,19 +23,25 @@ grasping_only_plot = True
 navigation_and_grasping_plot = False
 clip_times = True #clip within predefined range
 
-dir_name = 'logs_33_constant_singlecanpose'
-num_runs = len(os.listdir('../' + dir_name))
+choices = ['logs_26_constant_singlecanpose', 'logs_33_constant_singlecanpose', 'logs_50_constant_singlecanpose',
+             'logs_55_constant_singlecanpose']
 
+choices_wanted = [0, 1, 2, 3]
+dir_names = []
+
+for choices_idx in choices_wanted:
+    dir_names.append(choices[choices_idx])
+
+#dir_name = 'logs_26_constant_singlecanpose'
 
 assert sum([success_plot, grasping_only_plot, navigation_and_grasping_plot]) == 1, 'only one value should be true'
-assert(num_runs > 0)
 
-file_range = [1, num_runs]
+
 
 x_range = [-0.4, 0.1]
 y_range = [1.55, 1.7]
 
-time_range = [5, 12] #this is the range at which we will normalize  and clip the times to
+time_range = [6, 14] #this is the range at which we will normalize  and clip the times to
 
 can_pose = [-0.27, 2.25]
 
@@ -44,14 +50,24 @@ table_pose = [-0.49 - table_size[0]/2, 2.1]
 
 fontsize = 40
 
-data = []
-for file_idx in range(file_range[0], file_range[1] + 1):
-    
-    data_part = pd.read_pickle('../{}/run_{}.pkl'.format(dir_name, file_idx))
-    data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
-   
-data = pd.concat(data, ignore_index = True)
+dataframe_lists = []
 
+for dir_name in dir_names:
+    data = []
+    num_runs = len(os.listdir('../' + dir_name))
+    assert(num_runs > 0)
+    
+    for file_idx in range(1, num_runs + 1):
+        
+        data_part = pd.read_pickle('../{}/run_{}.pkl'.format(dir_name, file_idx))
+        data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
+    
+    data = pd.concat(data, ignore_index = True)
+    dataframe_lists.append(data)
+
+
+data = pd.concat(dataframe_lists, ignore_index = True)
+num_runs = data.shape[0] #cumulative length
 
 log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
 
@@ -70,19 +86,22 @@ for task in log_durations:
 #data_ = data[data['Arm Execution Duration'] < 20]
     
 
-pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = False)
+pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = navigation_and_grasping_plot) #false
 
-times_clipped = np.clip(pose_with_times[:, -1], time_range[0], time_range[1])
+if success_plot:
+    val_plotted = data['Success']
+elif grasping_only_plot or navigation_and_grasping_plot:
+    val_plotted = np.clip(pose_with_times[:, -1], time_range[0], time_range[1])
 
 fig = plt.figure(figsize = (20, 20))
 
 ax = fig.add_subplot(1, 1, 1)
 
-scatter = ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = times_clipped, cmap = matplotlib.cm.coolwarm_r,  s = 500)
+scatter = ax.scatter(pose_with_times[:, 0], pose_with_times[:, 1], c = val_plotted, cmap = matplotlib.cm.coolwarm_r,  s = 500)
 
 utils.add_limits_and_labels_to_axes(ax, x_range, y_range, x_title
                                     = 'X val', y_title = 'Y val', fontsize = 40, 
-                                    title = 'Pose vs Time for {} runs'.format(num_runs))
+                                    title = 'Pose vs Arm Execution Time for {} runs'.format(num_runs))
 
 utils.add_can_and_table_to_axes(ax, can_pose, table_pose, table_size)
 
