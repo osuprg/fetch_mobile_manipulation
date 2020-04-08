@@ -27,7 +27,7 @@ def pose_to_array(pose, orientation = False):
     
     
 
-def extract_poses_with_times(dataframe, include_navigation_time = False):
+def extract_poses_with_times(dataframe, include_navigation_time = False, include_arm_execution_time = True):
     
     assert(type(include_navigation_time) == bool)
     
@@ -36,7 +36,8 @@ def extract_poses_with_times(dataframe, include_navigation_time = False):
     for idx in range(dataframe.shape[0]):
         
         result[idx][0:2] = pose_to_array(dataframe.iloc[idx]['Arm Execution Start Pose'])[:2] #ignoring yaw
-        result[idx][2] = dataframe.iloc[idx]['Arm Execution Duration'] + include_navigation_time * dataframe.iloc[idx]['Base Navigation Duration']
+        result[idx][2] = include_arm_execution_time * dataframe.iloc[idx]['Arm Execution Duration'] + \
+            include_navigation_time * dataframe.iloc[idx]['Base Navigation Duration']
         
     return result
 
