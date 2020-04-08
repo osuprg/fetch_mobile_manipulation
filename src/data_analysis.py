@@ -18,15 +18,17 @@ import os
 import matplotlib
 
 filter_arm_failure = True
-success_plot = False
-grasping_only_plot = True
+success_plot = True
+grasping_only_plot = False
 navigation_and_grasping_plot = False
+only_navigation_plot = False
 clip_times = True #clip within predefined range
 
 choices = ['logs_26_constant_singlecanpose', 'logs_33_constant_singlecanpose', 'logs_50_constant_singlecanpose',
-             'logs_55_constant_singlecanpose']
+             'logs_55_constant_singlecanpose', 'logs_78_random_differentcanpose', 'logs']
 
-choices_wanted = [0, 1, 2, 3]
+choices_wanted = [-1]
+#choices_wanted = [0]
 dir_names = []
 
 for choices_idx in choices_wanted:
@@ -34,16 +36,31 @@ for choices_idx in choices_wanted:
 
 #dir_name = 'logs_26_constant_singlecanpose'
 
-assert sum([success_plot, grasping_only_plot, navigation_and_grasping_plot]) == 1, 'only one value should be true'
+assert sum([success_plot, grasping_only_plot, navigation_and_grasping_plot, only_navigation_plot]) == 1, 'only one value should be true'
 
 
 
 x_range = [-0.4, 0.1]
 y_range = [1.55, 1.7]
 
-time_range = [6, 14] #this is the range at which we will normalize  and clip the times to
+if grasping_only_plot:
+    title_str = 'Pose vs Arm Execution'
+    time_range = [5, 12] #this is the range at which we will normalize  and clip the times to
 
-can_pose = [-0.27, 2.25]
+elif navigation_and_grasping_plot:
+    title_str = 'Pose vs (Navigation + Arm Execution)'
+    time_range = [15, 30] #this is the range at which we will normalize  and clip the times to
+
+elif only_navigation_plot:
+    title_str = 'Pose vs Navigation'
+    time_range = [10, 24] #this is the range at which we will normalize  and clip the times to
+
+elif success_plot:
+    title_str = 'Pose vs Success'
+else:
+    assert(False)
+
+can_pose = [-0.27, 2.25] #OVERRIDEN LATER
 
 table_size = [0.85, 0.25]
 table_pose = [-0.49 - table_size[0]/2, 2.1]
@@ -51,10 +68,12 @@ table_pose = [-0.49 - table_size[0]/2, 2.1]
 fontsize = 40
 
 dataframe_lists = []
+run_per_log = []
 
 for dir_name in dir_names:
     data = []
     num_runs = len(os.listdir('../' + dir_name))
+    run_per_log.append(num_runs)
     assert(num_runs > 0)
     
     for file_idx in range(1, num_runs + 1):
@@ -71,6 +90,7 @@ num_runs = data.shape[0] #cumulative length
 
 log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
 
+can_pose = utils.pose_to_array(data.iloc[2]['Can Pose'].pose)
 
 if filter_arm_failure:
    data = data.loc[data['Arm Execution End'] != 0]
@@ -86,11 +106,11 @@ for task in log_durations:
 #data_ = data[data['Arm Execution Duration'] < 20]
     
 
-pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = navigation_and_grasping_plot) #false
+pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = navigation_and_grasping_plot or only_navigation_plot , include_arm_execution_time = not(only_navigation_plot)) #false
 
 if success_plot:
     val_plotted = data['Success']
-elif grasping_only_plot or navigation_and_grasping_plot:
+else:
     val_plotted = np.clip(pose_with_times[:, -1], time_range[0], time_range[1])
 
 fig = plt.figure(figsize = (20, 20))
