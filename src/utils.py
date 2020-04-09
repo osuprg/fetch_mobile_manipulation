@@ -13,6 +13,8 @@ import pandas as pd
 from tf.transformations import euler_from_quaternion as quat_to_euler
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from sklearn.linear_model import RANSACRegressor
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def pose_to_array(pose, orientation = False):
@@ -86,6 +88,34 @@ def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
     
     cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
     cbar.set_label(label, fontsize = fontsize)
+    
+def get_surface_plot(pose_with_times, x_range, y_range, title = 'Pose vs Times', fontsize = 10):
+
+  
+    x = pose_with_times[:, 0:2]
+    y = pose_with_times[:, -1]
+    reg = RANSACRegressor().fit(x, y)
+    
+    xx_grid, yy_grid = np.meshgrid(np.linspace(x_range[0]  - 0.3, x_range[1], 50), np.linspace(y_range[0] - 0.1, y_range[1] + 0.1, 50))
+    X_grid = np.c_[xx_grid.ravel(), yy_grid.ravel()]
+    surface = reg.predict(X_grid)
+  
+    pred_val = reg.predict(pose_with_times[:, :2])
+    color = (pose_with_times[:, -1] > pred_val)
+    
+    fig = plt.figure()
+    ax  = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(xx_grid, yy_grid, surface.reshape(-1, xx_grid.shape[0]))
+ 
+    ax.scatter3D(pose_with_times[:, 0], pose_with_times[:, 1], pose_with_times[:, -1], c = color)
+
+    ax.set_xlim(x_range[0] - 0.3, x_range[1])
+    ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.1)
+    ax.set_xlabel('X values (metres)', fontsize = 10)
+    ax.set_ylabel('Y values (metres)', fontsize = 10)
+    ax.set_title(title)
+
+    return ax
     
 
 #def make_hist_plot(data, column = 'Arm Times', title = 'Arm Execution Histogram',
