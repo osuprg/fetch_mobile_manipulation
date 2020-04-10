@@ -19,6 +19,8 @@ import matplotlib
 
 filter_arm_failure = True
 
+NORMALIZE_POSE_ACCORDING_TO_CAN = False #shift the exec pose linearly according to a default can pose
+
 choices = ['logs_26_constant_singlecanpose', 'logs_33_constant_singlecanpose', 'logs_50_constant_singlecanpose',
              'logs_55_constant_singlecanpose', 'logs_78_random_differentcanpose', 'logs']
 
@@ -83,15 +85,19 @@ for plotted in all_plots:
     
     
     data = pd.concat(dataframe_lists, ignore_index = True)
-    num_runs = data.shape[0] #cumulative length
+    
     
     log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
     
-    can_pose = utils.pose_to_array(data.iloc[2]['Can Pose'].pose)
-    x_range = [can_pose[0] - 0.4, can_pose[0] + 0.4]
-    
+
     if filter_arm_failure:
        data = data.loc[data['Arm Execution End'] != 0]
+       
+    num_runs = data.shape[0] #cumulative length
+       
+    can_pose = utils.pose_to_array(data.iloc[0]['Can Pose'].pose)
+    default_can_pose = utils.pose_to_array(data.iloc[0]['Can Pose'].pose)
+    x_range = [can_pose[0] - 0.4, can_pose[0] + 0.4]
     
     data.loc[data['Arm Execution End'] == 0, 'Arm Execution End'] = datetime.datetime.now() #just set it to current time, means fail
     
@@ -106,6 +112,13 @@ for plotted in all_plots:
     
     pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = ((plotted == 'navigation_and_grasping_plot')
                or (plotted =='only_navigation_plot')) , include_arm_execution_time = not(plotted == 'only_navigation_plot')) #false
+    
+    if NORMALIZE_POSE_ACCORDING_TO_CAN and plotted == 'grasping_only_plot':
+        
+        for i in range(len(pose_with_times)):
+            can_offset = default_can_pose[:2] - utils.pose_to_array(data.iloc[i]['Can Pose'].pose)[:2]  
+            pose_with_times[i, 0:2] += can_offset
+     
     
     if plotted == 'success_plot':
         val_plotted = data['Success']
