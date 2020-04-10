@@ -15,6 +15,10 @@ import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.linear_model import RANSACRegressor
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
+
 
 
 def pose_to_array(pose, orientation = False):
@@ -89,12 +93,22 @@ def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
     cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
     cbar.set_label(label, fontsize = fontsize)
     
-def get_surface_plot(pose_with_times, x_range, y_range, title = 'Pose vs Times', fontsize = 10):
+def get_surface_plot(pose_with_times, x_range, y_range, title = 'Pose vs Times', model = 'linear', fontsize = 10):
 
   
     x = pose_with_times[:, 0:2]
     y = pose_with_times[:, -1]
-    reg = RANSACRegressor().fit(x, y)
+    
+    if model == 'linear':
+        reg = RANSACRegressor().fit(x, y)
+    elif model == 'quadratic':
+        reg = make_pipeline(PolynomialFeatures(2), Ridge())
+        reg.fit(x, y)
+    elif model == 'cubic':
+         reg = make_pipeline(PolynomialFeatures(3), Ridge())
+         reg.fit(x, y)
+    else:
+        assert(False)
     
     xx_grid, yy_grid = np.meshgrid(np.linspace(x_range[0]  - 0.3, x_range[1], 50), np.linspace(y_range[0] - 0.1, y_range[1] + 0.1, 50))
     X_grid = np.c_[xx_grid.ravel(), yy_grid.ravel()]
