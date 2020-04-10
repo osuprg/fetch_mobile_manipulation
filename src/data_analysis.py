@@ -147,7 +147,7 @@ for plotted in all_plots:
     
     
     #fig.show()
-    
+    plt.close()
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     
@@ -170,8 +170,8 @@ for plotted in all_plots:
 #    suc.append(data_chunk['Success'].mean())
 #    start_idx = run_per_log[i]
 
-
-
+utils.get_surface_plot(pose_with_times, x_range, y_range, model = 'cubic')
+plt.show()
 
 
 '''
