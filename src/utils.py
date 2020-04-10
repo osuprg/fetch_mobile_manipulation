@@ -93,7 +93,7 @@ def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
     cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
     cbar.set_label(label, fontsize = fontsize)
     
-def get_surface_plot(pose_with_times, x_range, y_range, title = 'Pose vs Times', model = 'linear', fontsize = 10):
+def get_surface_plot(fig, pose_with_times, x_range, y_range, title = 'Pose vs Times', model = 'linear', fontsize = 10):
 
   
     x = pose_with_times[:, 0:2]
@@ -117,7 +117,6 @@ def get_surface_plot(pose_with_times, x_range, y_range, title = 'Pose vs Times',
     pred_val = reg.predict(pose_with_times[:, :2])
     color = (pose_with_times[:, -1] > pred_val)
     
-    fig = plt.figure()
     ax  = fig.add_subplot(111, projection='3d')
     ax.plot_surface(xx_grid, yy_grid, surface.reshape(-1, xx_grid.shape[0]))
  
