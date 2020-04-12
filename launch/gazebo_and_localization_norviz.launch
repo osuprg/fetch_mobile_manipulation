@@ -60,4 +60,7 @@
     <arg name="info" value="true"/><!-- publish grasp markers -->
   </include>
 
+   <param name="move_group/trajectory_execution/allowed_start_tolerance" type="double"
+ 		value="0"/>
+
 </launch>
