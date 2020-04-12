@@ -35,6 +35,10 @@ all_plots = ['success_plot', 'grasping_only_plot', 'navigation_and_grasping_plot
                  'only_navigation_plot']
 
 save_dir = '../results/default/'
+surface_plots = []
+#surface_plots = ['linear', 'quadratic', 'cubic']
+
+save_dir = '../results/grasping_fix/'
 
 for plotted in all_plots:
     
@@ -43,7 +47,10 @@ for plotted in all_plots:
     y_range = [1.55, 1.7]
     
     if plotted == 'grasping_only_plot':
-        title_str = 'Pose vs Arm Execution Time'
+        if not NORMALIZE_POSE_ACCORDING_TO_CAN:
+            title_str = 'Pose vs Arm Execution Time'
+        else:
+            title_str = 'Pose vs Arm Time Normalized by can offset'
         time_range = [5, 12] #this is the range at which we will normalize  and clip the times to
     
     elif plotted == 'navigation_and_grasping_plot':
@@ -159,6 +166,15 @@ for plotted in all_plots:
     start_idx = 0
     chunk = []
     suc = []
+   
+    
+    for model in surface_plots:
+        fig = plt.figure(figsize = (20, 20)) #new 3d figure
+        
+        utils.get_surface_plot(fig, pose_with_times, x_range, y_range, title = title_str, model = model)
+        fig.savefig(save_dir + plotted + '_' + model + '_surface_' + str(num_runs) + '.png')
+    #plt.show()
+    
 
 #for i in range(len(run_per_log)):
 #    
@@ -170,8 +186,7 @@ for plotted in all_plots:
 #    suc.append(data_chunk['Success'].mean())
 #    start_idx = run_per_log[i]
 
-utils.get_surface_plot(pose_with_times, x_range, y_range, model = 'cubic')
-plt.show()
+
 
 
 '''
