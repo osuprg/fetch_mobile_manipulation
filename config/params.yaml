@@ -6,8 +6,8 @@ sample_xhigh: 0
 sample_ylow : 1.55
 sample_yhigh: 1.7
 default_goal: -0.4,1.66, 1.57 #TODO - use this
-can_offset_x: -0.1
-can_offset_y: -0.1
+can_offset_x: 0
+can_offset_y: 0
 #note that can offsets changes the sample_xlow range accordingly
 [gazebo]
 #gazebo params
