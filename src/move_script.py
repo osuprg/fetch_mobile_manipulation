@@ -20,6 +20,7 @@ from control_msgs.msg import GripperCommandGoal, GripperCommandAction
 from grasping_msgs.msg import FindGraspableObjectsAction, FindGraspableObjectsGoal
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from nav_msgs.msg import Odometry
 from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from gazebo_msgs.srv import GetModelStateRequest, GetModelState
@@ -191,6 +192,7 @@ class GraspingClient(object):
         self.group.set_goal_tolerance(0.001)
         
         #gripper params
+        self.gripper_height_above = 0.3
         self.gripper_closed_pos = 0  # The position for a fully-closed gripper (meters).
         self.gripper_open_pos = 0.10  # The position for a fully-open gripper (meters).
         self.MIN_EFFORT = 35  # Min grasp force, in Newtons
@@ -224,14 +226,14 @@ class GraspingClient(object):
          grasp_pose.pose.orientation.w = quat[3]
          grasp_pose.header.stamp = rospy.Time.now()
          grasp_pose.header.frame_id = 'map'
-         grasp_pose.pose.position.z+=0.3
+         grasp_pose.pose.position.z+= self.gripper_height_above
          
-         transform = self.tf_buffer.lookup_transform('base_link',
-                                       'map', #source frame
-                                       rospy.Time(0), #get the tf at first available time
-                                       rospy.Duration(1.0)) #wait for 1 second
-
-         grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, transform)
+#         base_to_map_transform = self.tf_buffer.lookup_transform('base_link',
+#                                       'map', #source frame
+#                                       rospy.Time(0), #get the tf at first available time
+#                                       rospy.Duration(1.0)) #wait for 1 second
+#
+#         grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform) #NOT USED
         
          self.group.set_pose_target(grasp_pose)
          #pdb.set_trace()
@@ -254,17 +256,29 @@ class GraspingClient(object):
          time.sleep(1)
          if not p1.joint_trajectory.points:
              return
-         self.move_gripper_linearly(grasp_pose_in_base, avoid_collisions = False)
+         
+         base_to_map_transform_updated = self.tf_buffer.lookup_transform('base_link',
+                                       'map', #source frame
+                                       rospy.Time(0), #get the tf at first available time
+                                       rospy.Duration(1.0)) #wait for 1 second
+
+         grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform_updated)
+         #pdb.set_trace()
+         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
+         time.sleep(0.25)
+         #pdb.set_trace()
+         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.2, avoid_collisions = False)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
          time.sleep(1)
+        
          self.gripper_open()
          #time.sleep(1)
          #self.gripper_close()
          #pdb.set_trace()
          self.gripper_close()
          time.sleep(1)
-         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -0.2) #lift up
+         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -1 * self.gripper_height_above + 0.1) #lift up
          
          #group.get_end_effector_link()
 
@@ -348,8 +362,9 @@ class GraspingClient(object):
             if result.error_code.val == MoveItErrorCodes.SUCCESS:
                 return
             
-    def move_gripper_linearly(self, grasp_pose, reduce_height_by = 0.20, avoid_collisions = False, eef_step = 0.001): #computes cartesian path and goes down by depth m
+    def move_gripper_linearly(self, grasp_pose, reduce_height_by = 0.20, avoid_collisions = False, eef_step = 0.005): #computes cartesian path and goes down by depth m
         
+        #self.group.set_goal_tolerance(0.0005)
         waypoints = []
         
         waypoints.append(grasp_pose.pose)
@@ -358,9 +373,10 @@ class GraspingClient(object):
         target_pose.pose.position.z -= reduce_height_by
         waypoints.append(target_pose.pose)
         #pdb.set_trace()
-        trajectory, fraction = self.group.compute_cartesian_path(waypoints, 0.01, 0, avoid_collisions)
+        trajectory, fraction = self.group.compute_cartesian_path(waypoints, eef_step, 0, avoid_collisions)
         #pdb.set_trace()
         self.group.execute(trajectory) #execute previously planned trajectory
+        #self.group.set_goal_tolerance(0.001)
         #pdb.set_trace()
         
 
@@ -385,7 +401,7 @@ class AmclPose:
         
     def get_pose(self):
         
-         pose_stamped = rospy.wait_for_message('/amcl_pose', PoseWithCovarianceStamped)
+         pose_stamped = rospy.wait_for_message('/odom_fake', Odometry)
          #pdb.set_trace()
          pose_val = pose_stamped.pose.pose
          
@@ -508,7 +524,7 @@ def sample_valid_navigation_goal(publish_goal_marker = True):
 rospy.init_node("demo", anonymous = True)
 rospy.on_shutdown(shutdown_process)
 
-amcl = AmclPose()
+amcl = AmclPose() #TODO - WE ARE ACTUALLY USING ODOMETRY AS AMCL, clean this up
 # Setup clients
 move_base = MoveBaseClient()
 torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
@@ -522,7 +538,7 @@ pose_publisher =  RvizMarkerPublish()
 ##
 #Move the base to be in front of the table
 rospy.loginfo("Setting initial pose")   
-amcl.set_pose()
+#amcl.set_pose()
 rospy.loginfo("Moving to table...")
 if sample_random_nav_goal:
     nav_goal = sample_valid_navigation_goal()
