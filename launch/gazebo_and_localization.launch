@@ -44,12 +44,13 @@
   </group>
 
   <!-- localize the robot -->
-  <include file="$(arg amcl_include)" />
+  <!--<include file="$(arg amcl_include)" />-->
 
   <!-- move the robot -->
   <include file="$(arg move_base_include)" >
     <arg name="name" value="fetch" />
     <arg if="$(arg use_keepout)" name="map_topic" value="map_keepout" />
+    <!--<arg name="odom_topic" value="odom_fake_2"/>-->
   </include>
 
   <!-- tilt the head -->
@@ -59,8 +60,11 @@
   <include file="$(find fetch_moveit_config)/launch/move_group.launch" >
     <arg name="info" value="true"/><!-- publish grasp markers -->
   </include>
+   <param name="move_group/arm/allowed_start_tolerance" type="double"
+ 		value="0.0"/>
+   <param name="move_group/arm/longest_valid_segment_fraction" type="double"
+ 		value="0.005"/>
+  <node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /map /odom 50"/>
 
-
-  <node pkg="rviz" type="rviz" name="rviz_nav"/>
 
 </launch>

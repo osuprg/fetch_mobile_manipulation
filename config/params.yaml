@@ -1,6 +1,6 @@
 [experiment_section]
 #details
-sample_random_nav_goal: True
+sample_random_nav_goal: False
 sample_xlow: -0.5
 sample_xhigh: 0
 sample_ylow : 1.55
@@ -14,7 +14,7 @@ can_offset_y: 0
 render: False
 sleep_time_after_fetchspawn: 10
 experiment_duration: 60
-gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization_norviz.launch
+gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch
 move_script: /home/sritee/catkin_ws/src/navr/launch/test.launch
 
 
