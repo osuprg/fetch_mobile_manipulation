@@ -60,10 +60,7 @@
   <include file="$(find fetch_moveit_config)/launch/move_group.launch" >
     <arg name="info" value="true"/><!-- publish grasp markers -->
   </include>
-   <param name="move_group/arm/allowed_start_tolerance" type="double"
- 		value="0.0"/>
-   <param name="move_group/arm/longest_valid_segment_fraction" type="double"
- 		value="0.005"/>
+   <rosparam command="load" file = "$(find navr)/config/moveit_params.yaml"/>
   <node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /map /odom 50"/>
 
 

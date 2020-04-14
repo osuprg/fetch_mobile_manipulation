@@ -1,0 +1,3 @@
+move_group/arm/longest_valid_segment_fraction : 0.005
+move_group/arm/allowed_start_tolerance : 0.1
+
