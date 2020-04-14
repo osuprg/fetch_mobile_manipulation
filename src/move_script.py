@@ -43,7 +43,7 @@ import ConfigParser
 
 logger = CustomLogger()
 config = ConfigParser.ConfigParser()
-config.read('/home/sritee/catkin_ws/src/navr/config/params.yaml')
+config.read('/home/sritee/catkin_ws/src/navr/config/experiment_params.yaml')
 
 experiment_section_name = 'experiment_section'
 sample_random_nav_goal = (config.get(experiment_section_name, 'sample_random_nav_goal') == 'True')

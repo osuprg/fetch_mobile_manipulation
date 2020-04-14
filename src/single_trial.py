@@ -15,7 +15,7 @@ import time
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
-config.read('../config/params.yaml')
+config.read('../config/experiment_params.yaml')
 
 gazebo_section_name = 'gazebo'
 
