@@ -93,7 +93,7 @@ def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
     cbar = fig.colorbar(scatter, cax=cax, orientation='vertical')
     cbar.set_label(label, fontsize = fontsize)
     
-def get_surface_plot(fig, pose_with_times, x_range, y_range, title = 'Pose vs Times', model = 'linear', fontsize = 10):
+def get_surface_plot(fig, pose_with_times, x_range, y_range, title = 'Pose vs Times', model = 'linear', fontsize = 30):
 
   
     x = pose_with_times[:, 0:2]
