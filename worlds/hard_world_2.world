@@ -345,55 +345,39 @@
       <pose frame=''>0.66883 3.52371 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>2076 788000000</sim_time>
-      <real_time>81 83338378</real_time>
-      <wall_time>1587174805 544512076</wall_time>
-      <iterations>80630</iterations>
+      <sim_time>2229 233000000</sim_time>
+      <real_time>89 907268395</real_time>
+      <wall_time>1587432944 794183582</wall_time>
+      <iterations>89326</iterations>
       <model name='Untitled'>
-        <pose frame=''>-0.049261 0.03509 0 0 -0 0</pose>
+        <pose frame=''>-0.487456 0.287943 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='Wall_4'>
-          <pose frame=''>0.003204 -4.81863 0 0 -0 0</pose>
+          <pose frame=''>-0.434991 -4.56578 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='Wall_5'>
-          <pose frame=''>2.80321 -0.018627 0 0 -0 1.5708</pose>
+          <pose frame=''>2.36502 0.234226 0 0 -0 1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='Wall_6'>
-          <pose frame=''>0.128204 4.78137 0 0 -0 3.14159</pose>
+          <pose frame=''>-0.309991 5.03422 0 0 -0 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='Wall_8'>
-          <pose frame=''>-2.71583 4.82666 0 0 -0 2.87979</pose>
+          <pose frame=''>-3.15402 5.07951 0 0 -0 2.87979</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='Wall_9'>
-          <pose frame=''>-2.88487 0.07196 0 0 0 -1.5708</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='biscuit_box'>
-        <pose frame=''>-0.10588 2.24665 0.565574 0.075337 -1.56172 -0.013863</pose>
-        <scale>1 1 1</scale>
-        <link name='biscuit_box::link'>
-          <pose frame=''>-0.130832 2.24511 0.5658 0.075337 -1.56172 -0.013863</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-        <link name='link_1'>
-          <pose frame=''>-0.155789 2.24357 0.566027 0.075337 -1.56172 -0.013863</pose>
+          <pose frame=''>-3.32307 0.324813 0 0 0 -1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -410,28 +394,28 @@
         </link>
       </model>
       <model name='bottle_red_wine'>
-        <pose frame=''>-0.4999 2.13722 0.506874 0 -0 0</pose>
+        <pose frame=''>-0.456398 2.12754 0.472204 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_22'>
-          <pose frame=''>-0.538714 2.10342 0.509628 0 -0 0</pose>
+          <pose frame=''>-0.495212 2.09373 0.474958 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='link_23'>
-          <pose frame=''>-0.538714 2.10342 0.509628 0 -0 0</pose>
+          <pose frame=''>-0.495212 2.09373 0.474958 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='coke_can'>
-        <pose frame=''>-0.269665 2.27445 0.46566 -0.00697 -0.04273 -1.63163</pose>
+        <pose frame=''>-0.269812 2.27818 0.465493 -0.006512 -0.0427 -1.64147</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-0.269665 2.27445 0.46566 -0.00697 -0.04273 -1.63163</pose>
+          <pose frame=''>-0.269812 2.27818 0.465493 -0.006512 -0.0427 -1.64147</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 -9.8 2e-06 1.2e-05 -1e-06</acceleration>
+          <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -3.822 0 -0 0</wrench>
         </link>
       </model>
@@ -451,7 +435,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-0.201035 0.441105 2.1442 0 0.7858 1.55519</pose>
+        <pose frame=''>-0.214136 1.49496 1.27504 0 0.6178 1.61119</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -712,98 +696,6 @@
         <gravity>1</gravity>
       </link>
       <pose frame=''>0.125817 2.1973 0 0 -0 0</pose>
-    </model>
-    <model name='biscuit_box'>
-      <link name='biscuit_box::link'>
-        <pose frame=''>0 0 0.025 0 -0 0</pose>
-        <visual name='visual'>
-          <geometry>
-            <box>
-              <size>0.2 0.15 0.05</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.423 0.019 0.035 1</ambient>
-            <diffuse>0.423 0.019 0.035 1</diffuse>
-            <specular>0.01 0.01 0.01 1</specular>
-            <emissive>0 0 0 1</emissive>
-          </material>
-          <cast_shadows>1</cast_shadows>
-          <transparency>0</transparency>
-        </visual>
-        <collision name='collision'>
-          <laser_retro>0</laser_retro>
-          <max_contacts>10</max_contacts>
-          <pose frame=''>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.15</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <self_collide>0</self_collide>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-      </link>
-      <link name='link_1'>
-        <pose frame=''>0 0 0.05 0 -0 0</pose>
-        <visual name='visual'>
-          <geometry>
-            <box>
-              <size>0.2 0.15 0.001</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <uri>model://biscuit_box/materials/scripts</uri>
-              <uri>model://biscuit_box/materials/textures</uri>
-              <name>biscuit_pat</name>
-            </script>
-          </material>
-          <cast_shadows>1</cast_shadows>
-          <transparency>0</transparency>
-        </visual>
-        <collision name='collision'>
-          <laser_retro>0</laser_retro>
-          <max_contacts>10</max_contacts>
-          <pose frame=''>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.15</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <self_collide>0</self_collide>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-      </link>
-      <static>1</static>
-      <allow_auto_disable>1</allow_auto_disable>
-      <pose frame=''>-1.37497 1.15333 0 0 -0 0</pose>
     </model>
     <model name='bottle_red_wine'>
       <link name='link_22'>
