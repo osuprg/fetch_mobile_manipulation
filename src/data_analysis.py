@@ -119,7 +119,8 @@ for plotted in all_plots:
         
     
     pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = ((plotted == 'navigation_and_grasping_plot')
-               or (plotted =='only_navigation_plot')) , include_arm_execution_time = not(plotted == 'only_navigation_plot')) #false
+               or (plotted =='only_navigation_plot')) , include_arm_execution_time = not(plotted == 'only_navigation_plot'),
+    include_arm_planning_time = True)
     
     if NORMALIZE_POSE_ACCORDING_TO_CAN and plotted == 'grasping_only_plot':
         
