@@ -16,6 +16,7 @@ import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import matplotlib
+import glob
 
 filter_arm_failure = True
 
@@ -78,7 +79,7 @@ for plotted in all_plots:
     
     for dir_name in dir_names:
         data = []
-        num_runs = len(os.listdir('../' + dir_name))
+        num_runs = len(glob.glob('../' + dir_name + '/*.pkl'))
         run_per_log.append(num_runs)
         assert(num_runs > 0)
         
