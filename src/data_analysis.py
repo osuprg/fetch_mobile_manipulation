@@ -156,12 +156,13 @@ for plotted in all_plots:
     
     
     #fig.show()
-    plt.close()
+    fig.savefig(save_dir + plotted + '_' + str(num_runs) + '.png')
+    
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     
-    fig.savefig(save_dir + plotted + '_' + str(num_runs) + '.png')
-    
+    plt.close()
+
     means = []
     medians = []
     var = []
