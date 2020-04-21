@@ -2,7 +2,7 @@
   <arg name="robot" default="fetch"/>
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
-  <arg name="headless" default="false"/>
+  <arg name="headless" default="false"/> <!--Doesnt work, gazebo bug -->
   <arg name="rviz" default="false"/>
 
   <!-- Start Gazebo with a blank world -->
