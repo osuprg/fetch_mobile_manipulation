@@ -12,7 +12,7 @@
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="headless" value="$(arg headless)"/>
-    <arg name="world_name" value="worlds/grasp_table.world"/>
+    <arg name="world_name" value="worlds/empty.world"/>
   </include>
 
   <!-- Oh, you wanted a robot? Already spawned by world file -->

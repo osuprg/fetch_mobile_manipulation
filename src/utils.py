@@ -129,14 +129,22 @@ def get_surface_plot(fig, pose_with_times, x_range, y_range, title = 'Pose vs Ti
     ax.set_title(title)
 
     return ax
+
+def replace_text_in_file(file_name, old_text = 'worlds/empty.world', new_text = 'worlds/empty.world'):
+    
+    assert(type(old_text) == type(new_text) == str)
+    
+    with open(file_name) as f:
+        newText=f.read().replace(old_text, new_text)
+
+    with open(file_name, "w") as f:
+        f.write(newText)
+    
     
 
 #def make_hist_plot(data, column = 'Arm Times', title = 'Arm Execution Histogram',
 #                   xlabel = 'Time in Seconds for Planning and Execution', 
 #                   ylabel = 'Frequency'):
     
-    
-    
-
         
     

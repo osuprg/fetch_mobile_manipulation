@@ -13,6 +13,7 @@ The goal of this is to log event and their times
 import pandas as pd
 import numpy as np
 import datetime
+import os
 
 
 
@@ -62,22 +63,16 @@ class CustomLogger:
         
         return self._trial_number #returning new number if the caller wants it
     
-    def save(self, path = './run.pkl'):
+    def save(self, logdir, name, config_files = None):
         
-        self._data.to_pickle(path)
+        self._data.to_pickle(logdir + name)
+        for file_name in config_files:
+            os.popen('cp {} {}'.format(file_name, logdir)) #Save the config files seperately
+            
     
     def __str__(self):
         
         return str(self._data)
-    
-    
-        
-        
-        
-        
-    
-    
-    
         
         
         

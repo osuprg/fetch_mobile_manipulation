@@ -9,6 +9,9 @@ default_goal: -0.4,1.66, 1.57 #TODO - use this
 can_offset_x: 0
 can_offset_y: 0
 #note that can offsets changes the sample_xlow range accordingly
+log_folder: /home/sritee/catkin_ws/src/navr/logs_test/
+config_folder: /home/sritee/catkin_ws/src/navr/config/
+
 [gazebo]
 #gazebo params
 render: False
@@ -16,6 +19,7 @@ sleep_time_after_fetchspawn: 10
 experiment_duration: 60
 gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch
 move_script: /home/sritee/catkin_ws/src/navr/launch/test.launch
+world_file: worlds/hard_world_2.world #this is wrt gazebo path /usr/share/gazebo-7/
 
 
 

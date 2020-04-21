@@ -6,7 +6,7 @@ Spyder Editor
 This is a temporary script file.
 """
 
-
+import os
 import copy
 import actionlib
 import rospy
@@ -41,9 +41,11 @@ import pandas as pd
 from logger import CustomLogger
 import ConfigParser
 
+config_file_folder = '/home/sritee/catkin_ws/src/navr/config/'
+
 logger = CustomLogger()
 config = ConfigParser.ConfigParser()
-config.read('/home/sritee/catkin_ws/src/navr/config/experiment_params.yaml')
+config.read(config_file_folder + 'experiment_params.yaml')
 
 experiment_section_name = 'experiment_section'
 sample_random_nav_goal = (config.get(experiment_section_name, 'sample_random_nav_goal') == 'True')
@@ -61,6 +63,7 @@ default_nav_goal = [-0.40, 1.66, 1.57]
 default_nav_goal[0] += can_offset_x
 default_nav_goal[1] += can_offset_y
 
+log_directory = config.get(experiment_section_name, 'log_folder')
 #pdb.set_trace()
 # Move base using navigation stack
 class MoveBaseClient(object):
@@ -490,16 +493,15 @@ class RvizMarkerPublish:
 def shutdown_process():
     #currently doing logging during node shutdown
     cnt = 1
-    import os
-    #pdb.set_trace()
-    if not os.path.exists('/home/sritee/catkin_ws/src/navr/logs'):
-        os.mkdir('/home/sritee/catkin_ws/src/navr/logs')
-    while os.path.exists('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl'):
-    #pdb.set_trace()
-        cnt+=1
-    #pdb.set_trace()    
+    if not os.path.exists(log_directory):
+        os.mkdir(log_directory)
+    while os.path.exists(log_directory + 'run_' + str(cnt) + '.pkl'):
+        cnt+=1    
     rospy.loginfo("Saving Log file")
-    logger.save('/home/sritee/catkin_ws/src/navr/logs/run_' + str(cnt) + '.pkl')
+    
+    config_file_list = [config_file_folder + f for f in os.listdir(config_file_folder)]
+    logger.save(logdir = log_directory, name = 'run_'  + str(cnt) + '.pkl', 
+                config_files= config_file_list)
     
     
 def sample_valid_navigation_goal(publish_goal_marker = True):

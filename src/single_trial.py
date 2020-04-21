@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 import ConfigParser
+import utils
 
 config = ConfigParser.ConfigParser()
 config.read('../config/experiment_params.yaml')
@@ -25,6 +26,7 @@ single_trial_time = int(config.get(gazebo_section_name, 'experiment_duration')) 
 fetch_bringup_time = int(config.get(gazebo_section_name, 'sleep_time_after_fetchspawn'))
 launch_gazebo_path = config.get(gazebo_section_name, 'gazebo_launch')
 launch_node_path = config.get(gazebo_section_name, 'move_script')
+world_file = config.get(gazebo_section_name, 'world_file')
 
 port=str(11311)
 port_gazebo=str(11312)
@@ -43,6 +45,8 @@ os.system("killall -9 gzserver")
 
 rospy.init_node('trials')
 
+default_world = "worlds/empty.world"
+utils.replace_text_in_file(launch_gazebo_path, default_world, world_file)
 
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
@@ -50,10 +54,14 @@ roslaunch.configure_logging(uuid)
 launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
 launch_gazebo.start()
 
+utils.replace_text_in_file(launch_gazebo_path, world_file, default_world) #Rewrite the correct world name in launch file
+
 if not render:
     os.system("killall -9 gzclient")
 
 rospy.sleep(fetch_bringup_time) #for fetch bringup
+
+
 
 launch_node = roslaunch.parent.ROSLaunchParent(uuid, [launch_node_path])
 launch_node.start()
