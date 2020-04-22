@@ -254,7 +254,8 @@ class GraspingClient(object):
          #log execution time start
          logger.update_log('Arm Execution Start')
          logger.update_log('Arm Execution Start Pose', amcl.get_pose())
-         self.group.go()
+         arm_execution_success = self.group.go()
+         logger.update_log('Arm Execution Success', arm_execution_success)
          #log execution time end
          time.sleep(1)
          if not p1.joint_trajectory.points:
@@ -267,10 +268,12 @@ class GraspingClient(object):
 
          grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform_updated)
          #pdb.set_trace()
-         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
+         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
          time.sleep(0.25)
+         logger.update_log('Cartesian Servoing Success', cartesian_servoing_success)
          #pdb.set_trace()
-         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.2, avoid_collisions = False)
+         cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = self.gripper_height_above - 0.1, avoid_collisions = False)
+         logger.update_log('Cartesian Linear Success', cartesian_moving_down_success)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
          time.sleep(1)
@@ -378,9 +381,10 @@ class GraspingClient(object):
         #pdb.set_trace()
         trajectory, fraction = self.group.compute_cartesian_path(waypoints, eef_step, 0, avoid_collisions)
         #pdb.set_trace()
-        self.group.execute(trajectory) #execute previously planned trajectory
+        cartesian_execute_success = self.group.execute(trajectory) #execute previously planned trajectory
         #self.group.set_goal_tolerance(0.001)
         #pdb.set_trace()
+        return cartesian_execute_success
         
 
 class AmclPose:
