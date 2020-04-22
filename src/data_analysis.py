@@ -18,12 +18,13 @@ import os
 import matplotlib
 import glob
 
-filter_arm_failure = True
+filter_arm_failure = False #filter planning failures
+filter_only_success = True
 
 NORMALIZE_POSE_ACCORDING_TO_CAN = False #shift the exec pose linearly according to a default can pose
 
 choices = ['logs_26_constant_singlecanpose', 'logs_33_constant_singlecanpose', 'logs_50_constant_singlecanpose',
-             'logs_55_constant_singlecanpose', 'logs_78_random_differentcanpose', 'logs']
+             'hard_world_2', 'hard_world_1', 'hard_world_2_and_1', 'test']
 
 choices_wanted = [-1]
 dir_names = []
@@ -35,11 +36,10 @@ for choices_idx in choices_wanted:
 all_plots = ['success_plot', 'grasping_only_plot', 'navigation_and_grasping_plot', 
                  'only_navigation_plot']
 
-save_dir = '../results/default/'
 surface_plots = []
 #surface_plots = ['linear', 'quadratic', 'cubic']
 
-save_dir = '../results/grasping_fix/'
+save_dir = '../results/' + dir_names[-1] + '/'
 
 for plotted in all_plots:
     
@@ -52,11 +52,11 @@ for plotted in all_plots:
             title_str = 'Pose vs Arm Execution Time'
         else:
             title_str = 'Pose vs Arm Time Normalized by can offset'
-        time_range = [5, 12] #this is the range at which we will normalize  and clip the times to
+        time_range = [11, 22] #this is the range at which we will normalize  and clip the times to
     
     elif plotted == 'navigation_and_grasping_plot':
         title_str = 'Pose vs (Navigation + Arm Execution) Time'
-        time_range = [15, 32] #this is the range at which we will normalize  and clip the times to
+        time_range = [18, 40] #this is the range at which we will normalize  and clip the times to
     
     elif plotted == 'only_navigation_plot':
         title_str = 'Pose vs Navigation Time '
@@ -100,6 +100,8 @@ for plotted in all_plots:
 
     if filter_arm_failure:
        data = data.loc[data['Arm Execution End'] != 0]
+    if filter_only_success:
+       data = data.loc[data['Success'] == 1]
        
     num_runs = data.shape[0] #cumulative length
        
