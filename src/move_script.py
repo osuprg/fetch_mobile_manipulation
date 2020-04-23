@@ -216,10 +216,10 @@ class GraspingClient(object):
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface("base_link")
         self.group = moveit_commander.MoveGroupCommander(group)
-        self.group.set_goal_tolerance(0.001)
+        self.group.set_goal_tolerance(0.005)
         
         #gripper params
-        self.gripper_height_above = 0.3
+        self.gripper_height_above = 0.2
         self.gripper_closed_pos = 0  # The position for a fully-closed gripper (meters).
         self.gripper_open_pos = 0.10  # The position for a fully-open gripper (meters).
         self.MIN_EFFORT = 35  # Min grasp force, in Newtons
@@ -296,11 +296,12 @@ class GraspingClient(object):
          time.sleep(0.25)
          logger.update_log('Cartesian Servoing Success', cartesian_servoing_success)
          #pdb.set_trace()
-         cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = self.gripper_height_above - 0.1, avoid_collisions = False)
+         cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.1, avoid_collisions = False)
          logger.update_log('Cartesian Linear Success', cartesian_moving_down_success)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
          time.sleep(1)
+         #pdb.set_trace()
         
          self.gripper_open()
          #time.sleep(1)
@@ -308,7 +309,7 @@ class GraspingClient(object):
          #pdb.set_trace()
          self.gripper_close()
          time.sleep(1)
-         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -1 * self.gripper_height_above + 0.1) #lift up
+         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -0.2) #lift up
          
          #group.get_end_effector_link()
 
