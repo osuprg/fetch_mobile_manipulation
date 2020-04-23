@@ -292,7 +292,7 @@ class GraspingClient(object):
 
          grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform_updated)
          #pdb.set_trace()
-         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
+         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = True)
          time.sleep(0.25)
          logger.update_log('Cartesian Servoing Success', cartesian_servoing_success)
          #pdb.set_trace()
