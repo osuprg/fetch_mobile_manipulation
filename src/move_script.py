@@ -269,20 +269,20 @@ class GraspingClient(object):
          #log current time
          logger.update_log('Arm Planning Start')
          
-         p1 = self.group.plan()
+         plan = self.group.plan()
          logger.update_log('Arm Planning End')
-         logger.update_log('Arm Planning Success', bool(p1.joint_trajectory.points))
+         logger.update_log('Arm Planning Success', bool(plan.joint_trajectory.points))
          #pdb.set_trace()
          #print(p1)
          #log time after plan completed
          #log execution time start
          logger.update_log('Arm Execution Start')
          logger.update_log('Arm Execution Start Pose', amcl.get_pose())
-         arm_execution_success = self.group.go()
+         arm_execution_success = self.group.execute(plan)
          logger.update_log('Arm Execution Success', arm_execution_success)
          #log execution time end
          time.sleep(1)
-         if not p1.joint_trajectory.points:
+         if not plan.joint_trajectory.points:
              return
          
          base_to_map_transform_updated = self.tf_buffer.lookup_transform('base_link',
