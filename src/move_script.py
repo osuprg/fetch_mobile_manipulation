@@ -216,7 +216,8 @@ class GraspingClient(object):
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface("base_link")
         self.group = moveit_commander.MoveGroupCommander(group)
-        self.group.set_goal_tolerance(0.005)
+        self.tolerance = rospy.get_param('move_group/arm/tolerance', default = 0.005)
+        self.group.set_goal_tolerance(self.tolerance)
         
         #gripper params
         self.gripper_height_above = 0.2
