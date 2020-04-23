@@ -133,18 +133,31 @@ class FollowTrajectoryClient(object):
 # Point the head using controller
 class PointHeadClient(object):
 
-    def __init__(self):
+    def __init__(self, interface = 'pan_and_tilt'):
         
-        self.PAN_TILT_ACTION_NAME = 'head_controller/follow_joint_trajectory'
+        self.PAN_TILT_ACTION_NAME = None
+        self.POINT_HEAD_ACTION_NAME = None
+        
+        if interface == 'pan_and_tilt':
+            self.PAN_TILT_ACTION_NAME = 'head_controller/follow_joint_trajectory'
+            self.client = actionlib.SimpleActionClient(self.PAN_TILT_ACTION_NAME, FollowJointTrajectoryAction)
+        elif interface == 'point_head':
+            self.POINT_HEAD_ACTION_NAME = "head_controller/point_head"
+            self.client = actionlib.SimpleActionClient(self.POINT_HEAD_ACTION_NAME, PointHeadAction)
+        else:
+            raise ValueError('only pan_and_tilt and point_head supported')
+            
         self.PAN_JOINT = 'head_pan_joint'
         self.TILT_JOINT = 'head_tilt_joint'
         self.PAN_TILT_TIME = 1.5
         
-        self.client = actionlib.SimpleActionClient(self.PAN_TILT_ACTION_NAME, FollowJointTrajectoryAction)
         rospy.loginfo("Waiting for head_controller...")
         self.client.wait_for_server()
         
     def look_at(self, x = 1, y = 0, z = 0, frame = 'base_link', duration=1.0):
+        
+        if self.POINT_HEAD_ACTION_NAME == None:
+            raise Exception('using pan tilt interface, cannot point')
         goal = PointHeadGoal()
         goal.target.header.stamp = rospy.Time.now()
         goal.target.header.frame_id = frame
@@ -155,8 +168,11 @@ class PointHeadClient(object):
         self.client.send_goal(goal)
         self.client.wait_for_result()
         
-    def tilt_pan_head(self, pan = 0, tilt = 30): #input is in degrees
+    def tilt_pan_head(self, pan = 0, tilt = 0): #input is in degrees
         
+        if self.PAN_TILT_ACTION_NAME is None:
+            raise Exception('using point head interface, cannot pan and tilt')
+            
         pan = pan * np.pi / 180
         tilt = tilt * np.pi / 180
         
@@ -169,6 +185,14 @@ class PointHeadClient(object):
         goal.trajectory.points.append(point)
         self.client.send_goal(goal)
         self.client.wait_for_result()
+        
+    def look_at_surroundings(self, pan_range = 45, tilt_range = 45): #looks at surroundings to build octomap
+        
+        self.tilt_pan_head(pan = 0, tilt = tilt_range)
+        self.tilt_pan_head(pan = -tilt_range, tilt = tilt_range)
+        self.tilt_pan_head(pan = pan_range, tilt = tilt_range)
+        self.tilt_pan_head(pan = 0, tilt = 0)
+        
 
 # Tools for grasping
 class GraspingClient(object):
@@ -561,9 +585,8 @@ logger.update_log('Can Pose', obj_pose_before)
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 #pdb.set_trace()
 #rospy.sleep(3)
-head_action.tilt_pan_head(pan = 0, tilt = 70)
-head_action.tilt_pan_head(pan = 0, tilt = 0)
-head_action.tilt_pan_head(pan = 0, tilt = 40)
+
+head_action.look_at_surroundings(pan_range = 45, tilt_range = 45) #build octomap
 
 obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
