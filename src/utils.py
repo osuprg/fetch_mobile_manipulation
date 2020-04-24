@@ -79,13 +79,17 @@ def add_can_and_table_to_axes(ax, can_pose, table_pose, table_size):
     rect = patches.Rectangle((table_pose[0],table_pose[1]),table_size[0], table_size[1],linewidth=1,edgecolor='r',facecolor='none')
     ax.add_patch(rect)
     
-def add_limits_and_labels_to_axes(ax, x_range, y_range, x_title, y_title, fontsize = 40, title = 'Pose vs Times'):
+def add_limits_and_labels_to_axes(ax, x_range = None, y_range = None, x_title = 'X values (metres)',  y_title = 'Y values (metres)', fontsize = 40, title = 'Pose vs Times'):
     
     ax.set_title(title, fontsize = fontsize)
-    ax.set_xlim(x_range[0] - 0.3, x_range[1])
-    ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
-    ax.set_xlabel('X values (metres)', fontsize = fontsize)
-    ax.set_ylabel('Y values (metres)', fontsize = fontsize)
+    
+    if x_range is not None:
+        ax.set_xlim(x_range[0] - 0.3, x_range[1])
+    if y_range is not None:
+        ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
+        
+    ax.set_xlabel(x_title, fontsize = fontsize)
+    ax.set_ylabel(y_title, fontsize = fontsize)
     
 def add_colorbar(fig, ax, scatter, label = 'Times', fontsize = 40):
     
