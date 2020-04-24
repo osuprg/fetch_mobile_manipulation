@@ -17,14 +17,16 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import matplotlib
 import glob
+import time
 
-filter_arm_failure = False #filter planning failures
+filter_arm_failure = True #filter planning failures
 filter_only_success = True
+y_min_filter = 1.57
 
 NORMALIZE_POSE_ACCORDING_TO_CAN = False #shift the exec pose linearly according to a default can pose
 
 choices = ['logs_26_constant_singlecanpose', 'logs_33_constant_singlecanpose', 'logs_50_constant_singlecanpose',
-             'hard_world_2', 'hard_world_1', 'hard_world_2_and_1', 'test']
+             'hard_world_2', 'hard_world_1', 'hard_world_2_and_1']
 
 choices_wanted = [-1]
 dir_names = []
@@ -33,8 +35,8 @@ for choices_idx in choices_wanted:
     dir_names.append(choices[choices_idx])
 
 
-all_plots = ['success_plot', 'grasping_only_plot', 'navigation_and_grasping_plot', 
-                 'only_navigation_plot']
+all_plots = ['success_plot', 'navigation_and_grasping_plot', 
+                 'only_navigation_plot', 'grasping_only_plot']
 
 surface_plots = []
 #surface_plots = ['linear', 'quadratic', 'cubic']
@@ -52,11 +54,11 @@ for plotted in all_plots:
             title_str = 'Pose vs Arm Execution Time'
         else:
             title_str = 'Pose vs Arm Time Normalized by can offset'
-        time_range = [11, 22] #this is the range at which we will normalize  and clip the times to
+        time_range = [12, 19] #this is the range at which we will normalize  and clip the times to
     
     elif plotted == 'navigation_and_grasping_plot':
         title_str = 'Pose vs (Navigation + Arm Execution) Time'
-        time_range = [18, 40] #this is the range at which we will normalize  and clip the times to
+        time_range = [18, 37] #this is the range at which we will normalize  and clip the times to
     
     elif plotted == 'only_navigation_plot':
         title_str = 'Pose vs Navigation Time '
@@ -89,6 +91,14 @@ for plotted in all_plots:
             data.append(data_part[(data_part.iloc[:, 0] != 0)]) #remove all zero rows -- no data stored, todo - fix hack
         
         data = pd.concat(data, ignore_index = True)
+        
+        if filter_arm_failure:
+            data = data.loc[data['Arm Execution End'] != 0]
+        if filter_only_success:
+            data = data.loc[data['Success'] == 1]
+        
+        run_per_log[-1] = data.shape[0]
+        
         dataframe_lists.append(data)
     
     
@@ -98,10 +108,10 @@ for plotted in all_plots:
     log_durations = ['Base Planning', 'Base Navigation', 'Arm Planning', 'Arm Execution']
     
 
-    if filter_arm_failure:
-       data = data.loc[data['Arm Execution End'] != 0]
-    if filter_only_success:
-       data = data.loc[data['Success'] == 1]
+#    if filter_arm_failure:
+#       data = data.loc[data['Arm Execution End'] != 0]
+#    if filter_only_success:
+#       data = data.loc[data['Success'] == 1]
        
     num_runs = data.shape[0] #cumulative length
        
@@ -118,6 +128,8 @@ for plotted in all_plots:
         data[task + ' Duration'] = data[task + ' Duration'].apply(lambda k : k.total_seconds())
     
     #data_ = data[data['Arm Execution Duration'] < 20]
+    data = data[data.apply(lambda r : r['Base Planning Goal'][1] > y_min_filter, axis = 1)]
+    data.reset_index(inplace = True, drop = True)
         
     
     pose_with_times =  utils.extract_poses_with_times(data, include_navigation_time = ((plotted == 'navigation_and_grasping_plot')
@@ -161,39 +173,59 @@ for plotted in all_plots:
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
         
-    fig.savefig(save_dir + plotted + '_' + str(num_runs) + '.png')
-    
-    
+    fig.savefig(save_dir + plotted + '_' + str(num_runs) + filter_only_success * '_success_filtered' + '.png')
     plt.close()
-
-    means = []
-    medians = []
-    var = []
-    start_idx = 0
-    chunk = []
-    suc = []
-   
+      
+    #histogram plotting
+    fig = plt.figure(figsize = (10, 10))
     
+    ax = fig.add_subplot(1, 1, 1)
+    
+    if plotted == 'success_plot':
+        ax.hist((val_plotted.values) * 1.0) #success
+        utils.add_limits_and_labels_to_axes(ax, x_title = 'Success Bool', y_title = 'Number of Occurances',
+                                        title = plotted + filter_only_success * '_success_filtered_ ' + 'histogram',
+                                        fontsize = 20)
+    else:
+        ax.hist(pose_with_times[:, -1]) #Unclipped times histogram
+        utils.add_limits_and_labels_to_axes(ax, x_title = 'Time (s)', y_title = 'Number of Occurances',
+                                        title = plotted + filter_only_success * '_success_filtered_ ' + 'histogram',
+                                        fontsize = 20)
+    
+    time.sleep(0.25)
+    fig.savefig(save_dir + 'histogram_' +  plotted + '_' + str(num_runs) + filter_only_success * '_success_filtered' +  '.png')
+  
+    plt.close()
+   
     for model in surface_plots:
         fig = plt.figure(figsize = (20, 20)) #new 3d figure
         
         utils.get_surface_plot(fig, pose_with_times, x_range, y_range, title = title_str, model = model)
         fig.savefig(save_dir + plotted + '_' + model + '_surface_' + str(num_runs) + '.png')
     #plt.show()
+
+means = []
+means_plan = []
+medians = []
+var = []
+start_idx = 0
+chunk = []
+suc = []
+
+for i in range(len(run_per_log)):
     
-
-#for i in range(len(run_per_log)):
-#    
-#    data_chunk = data.iloc[start_idx : start_idx + run_per_log[i]]
-#    data_chunk_rel = data_chunk['Arm Execution Duration']
-#    means.append(data_chunk_rel.mean())
-#    var.append(data_chunk_rel.std())
-#    medians.append(data_chunk_rel.median())
-#    suc.append(data_chunk['Success'].mean())
-#    start_idx = run_per_log[i]
-
+    print(start_idx, start_idx + run_per_log[i])
+    data_chunk = data.iloc[start_idx : start_idx + run_per_log[i]]
+    data_chunk_rel = pose_with_times[start_idx : start_idx + run_per_log[i]][:, -1] #This holds arm grasping time
+    means_plan.append(data_chunk['Arm Planning Duration'].mean())
+    means.append(np.mean(data_chunk_rel))
+    var.append(np.std(data_chunk_rel))
+    medians.append(np.median(data_chunk_rel))
+    suc.append(data_chunk['Success'].mean())
+    start_idx = np.sum(run_per_log[0:i + 1]).astype('int32')
 
 
+print('done')
 
 '''
 Available columns for reference
