@@ -2,7 +2,7 @@ move_group/arm/longest_valid_segment_fraction : 0.001
 move_group/arm/allowed_start_tolerance : 0.0
 move_group/arm/tolerance : 0.005
 move_group/arm/gripper_height_above : 0.2 #TODO- height gripper above can before grasp
-move_base/TrajectoryPlannerROS/xy_goal_tolerance: 0.075 #default 0.1
-move_base/TrajectoryPlannerROS/yaw_tolerance: 0.075 #default 0.1
+move_base/TrajectoryPlannerROS/xy_goal_tolerance: 0.1 #default 0.1
+move_base/TrajectoryPlannerROS/yaw_tolerance: 0.1 #default 0.1
 
 

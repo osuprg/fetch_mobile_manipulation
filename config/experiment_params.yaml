@@ -15,8 +15,8 @@ config_folder: /home/sritee/catkin_ws/src/navr/config/
 [gazebo]
 #gazebo params
 render: True
-sleep_time_after_fetchspawn: 10
-experiment_duration: 60
+sleep_time_after_fetchspawn: 6
+experiment_duration: 70
 gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch
 move_script: /home/sritee/catkin_ws/src/navr/launch/test.launch
 world_file: /home/sritee/catkin_ws/src/navr/worlds/hard_world_2.world
