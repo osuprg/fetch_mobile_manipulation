@@ -480,7 +480,7 @@ def shutdown_process():
     
 def sample_valid_navigation_goal(publish_goal_marker = True):
     
-    theta = 1.57 #currently dixed
+    theta = default_nav_goal[-1] #currently fixed to be same as default yaw
     
     x_val = np.random.uniform(low = x_low , high = x_high)
     y_val =  np.random.uniform(low = y_low, high = y_high)
