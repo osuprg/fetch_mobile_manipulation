@@ -16,8 +16,13 @@
   </include>
 
   <!-- Oh, you wanted a robot? Already spawned by world file -->
-  <include file="$(find fetch_gazebo)/launch/include/$(arg robot).launch.xml" />
-
+  <include file="$(find fetch_gazebo)/launch/include/$(arg robot).launch.xml">
+  	<arg name="x" value="-0.5" />
+  	<arg name="y" value="0.75" />
+  	<arg name="z" value="0.0" />
+  	<arg name="yaw" value="1.57"/>
+  </include>
+ 
    <node pkg="navr" type="broadcaster.py" name="odom_fake_publisher"/>
 
   <!-- Navigation requires at least one map.

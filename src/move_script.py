@@ -26,6 +26,7 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from gazebo_msgs.srv import GetModelStateRequest, GetModelState
 from gazebo_msgs.srv import SetModelStateRequest, SetModelState
 from visualization_msgs.msg import Marker
+from std_srvs.srv import Empty
 import pdb
 import moveit_commander
 import tf
@@ -70,6 +71,8 @@ class MoveBaseClient(object):
 
     def __init__(self):
         self.client = actionlib.SimpleActionClient("move_base", MoveBaseAction)
+        self.clear_costmap_srv_name = '/move_base/clear_costmaps'
+        self.costmap_clearer = rospy.ServiceProxy(self.clear_costmap_srv_name, Empty)
         rospy.loginfo("Waiting for move_base...")
         self.client.wait_for_server()
 
@@ -99,6 +102,12 @@ class MoveBaseClient(object):
         self.client.wait_for_result()
         logger.update_log('Base Navigation End')
         logger.update_log('Base Navigation End Pose', amcl.get_pose())
+    
+    
+    def clear_costmap(self):
+        
+        rospy.wait_for_service(self.clear_costmap_srv_name)
+        self.costmap_clearer.call()
         
         #log current pose
         #log current time
@@ -580,6 +589,8 @@ else:
     
 #grasping_client.updateScene()
 gazebo_client.set_pose_relative('coke_can', can_offset_x, can_offset_y, 0)
+
+move_base.clear_costmap()
 #
 obj_pose_before = gazebo_client.get_pose('coke_can')
 logger.update_log('Can Pose', obj_pose_before)
