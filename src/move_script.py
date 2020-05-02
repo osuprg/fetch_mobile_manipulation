@@ -60,6 +60,8 @@ x_high = float(config.get(experiment_section_name, 'sample_xhigh'))  + can_offse
 y_low = float(config.get(experiment_section_name, 'sample_ylow'))  + can_offset_y
 y_high = float(config.get(experiment_section_name, 'sample_yhigh'))  + can_offset_y
 
+success_height = float(config.get(experiment_section_name, 'success_height'))
+
 default_nav_goal = [-0.65, 1.66, -1.57]
 #default_nav_goal = [-0.50, 2.86, -1.57]
 default_nav_goal[0] += can_offset_x
@@ -534,7 +536,7 @@ head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
 obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
 #
-logger.update_log('Success', gazebo_client.check_grasp_success())
+logger.update_log('Success', gazebo_client.check_grasp_success(height_threshold = success_height))
 
 
 
