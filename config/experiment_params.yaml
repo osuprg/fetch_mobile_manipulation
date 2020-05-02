@@ -18,7 +18,8 @@ success_height: 0.5
 #gazebo params
 render: True
 sleep_time_after_fetchspawn: 6
-experiment_duration: 70
+#max duration experiment will run
+experiment_duration: 60
 gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch
 move_script: /home/sritee/catkin_ws/src/navr/launch/test.launch
 world_file: /home/sritee/catkin_ws/src/navr/worlds/hard_world_2.world

@@ -14,6 +14,21 @@ import sys
 import time
 import ConfigParser
 import utils
+from std_srvs.srv import Empty
+
+def kill_launch_service(request):
+    
+    launch_gazebo.shutdown()
+    launch_node.shutdown()
+    
+    for process in ['gzclient', 'gzserver']:
+        while os.popen("ps -Af").read().count(process) > 0:
+            
+            os.system("killall -9 {}".format(process))
+            time.sleep(0.25)
+    
+    global experiment_running
+    experiment_running = False
 
 config = ConfigParser.ConfigParser()
 config.read('../config/experiment_params.yaml')
@@ -30,6 +45,8 @@ world_file = config.get(gazebo_section_name, 'world_file')
 
 port=str(11311)
 port_gazebo=str(11312)
+
+experiment_running = True
 
 
 os.environ["ROS_MASTER_URI"] = "http://localhost:"+ port
@@ -51,6 +68,8 @@ utils.replace_text_in_file(launch_gazebo_path, default_world, world_file)
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
 
+kill_message_service = rospy.Service('kill_launch', Empty, kill_launch_service)
+ 
 launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
 launch_gazebo.start()
 
@@ -61,18 +80,13 @@ if not render:
 
 rospy.sleep(fetch_bringup_time) #for fetch bringup
 
-
-
 launch_node = roslaunch.parent.ROSLaunchParent(uuid, [launch_node_path])
 launch_node.start()
 
-rospy.sleep(single_trial_time)
+start_time = time.time()
 
-launch_gazebo.shutdown()
-launch_node.shutdown()
+while experiment_running and ((time.time() - start_time) < single_trial_time):
+    time.sleep(1)
 
-for process in ['gzclient', 'gzserver']:
-    while os.popen("ps -Af").read().count(process) > 0:
-        
-        os.system("killall -9 {}".format(process))
-        time.sleep(1)
+
+

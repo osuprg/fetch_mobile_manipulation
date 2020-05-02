@@ -526,10 +526,7 @@ move_base.clear_costmap()
 obj_pose_before = gazebo_client.get_pose('coke_can')
 logger.update_log('Can Pose', obj_pose_before)
 
-#pdb.set_trace()
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
-#pdb.set_trace()
-#rospy.sleep(3)
 
 head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
 
@@ -537,6 +534,15 @@ obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
 #
 logger.update_log('Success', gazebo_client.check_grasp_success(height_threshold = success_height))
+
+#Time to request to kill ourselves!
+try: #To avoid error that service call didn't return we wrap in try catch
+    rospy.wait_for_service('kill_launch')
+    kill_us = rospy.ServiceProxy('kill_launch', Empty)
+    kill_us.call()
+except:
+    pass
+
 
 
 
