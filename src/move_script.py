@@ -60,7 +60,8 @@ x_high = float(config.get(experiment_section_name, 'sample_xhigh'))  + can_offse
 y_low = float(config.get(experiment_section_name, 'sample_ylow'))  + can_offset_y
 y_high = float(config.get(experiment_section_name, 'sample_yhigh'))  + can_offset_y
 
-default_nav_goal = [-0.40, 1.66, 1.57]
+default_nav_goal = [-0.65, 1.66, -1.57]
+#default_nav_goal = [-0.50, 2.86, -1.57]
 default_nav_goal[0] += can_offset_x
 default_nav_goal[1] += can_offset_y
 
@@ -109,8 +110,6 @@ class MoveBaseClient(object):
         rospy.wait_for_service(self.clear_costmap_srv_name)
         self.costmap_clearer.call()
         
-        #log current pose
-        #log current time
 
 # Send a trajectory to controller
 class FollowTrajectoryClient(object):
@@ -197,8 +196,7 @@ class PointHeadClient(object):
         
     def look_at_surroundings(self, pan_range = 45, tilt_range = 45): #looks at surroundings to build octomap
         
-        self.tilt_pan_head(pan = 0, tilt = tilt_range)
-        self.tilt_pan_head(pan = -tilt_range, tilt = tilt_range)
+        self.tilt_pan_head(pan = -pan_range, tilt = tilt_range)
         self.tilt_pan_head(pan = pan_range, tilt = tilt_range)
         self.tilt_pan_head(pan = 0, tilt = 0)
         
@@ -208,7 +206,6 @@ class GraspingClient(object):
 
     def __init__(self, group="arm"):
         
-#        self.scene = PlanningSceneInterface("base_link")
 #        self.pickplace = PickPlaceInterface("arm", "gripper", verbose=True)
 #        self.move_group = MoveGroupInterface("arm", "base_link")
 #
@@ -237,26 +234,19 @@ class GraspingClient(object):
         self.gripper_action_server_name = 'gripper_controller/gripper_action'
         self.gripper_client = actionlib.SimpleActionClient(self.gripper_action_server_name, GripperCommandAction)
         self.gripper_client.wait_for_server(rospy.Duration(10))
+        
+        self.gazebo_client = GazeboPoseMaster()
 
         
     def pick(self, obj_gazebo_pose):
          
-         #assuming object pose is in gazebo frame, need to transform to base link frame
-#         
-#         box_pose = PoseStamped()
-#         box_pose.header.frame_id = 'base_link'
-#         box_pose.pose.orientation.w = 1.0
-#         box_pose.pose.position.x = 0.5
-#         box_pose.pose.position.y = 0
-#         box_pose.pose.position.z = 0.5
-#         
-#         self.scene.attach_box('base_link', 'table_top', box_pose, size = (1,1,1))
-         
+
          pose_publisher.publish(obj_gazebo_pose)
          grasp_pose = PoseStamped()
          grasp_pose.pose.position = obj_gazebo_pose.pose.position
 
          quat = tf.transformations.quaternion_from_euler(0, np.pi/2, 0) #rotation about z axis
+         
          grasp_pose.pose.orientation.x = quat[0]
          grasp_pose.pose.orientation.y = quat[1]
          grasp_pose.pose.orientation.z = quat[2]
@@ -264,64 +254,48 @@ class GraspingClient(object):
          grasp_pose.header.stamp = rospy.Time.now()
          grasp_pose.header.frame_id = 'map'
          grasp_pose.pose.position.z+= self.gripper_height_above
-         
-#         base_to_map_transform = self.tf_buffer.lookup_transform('base_link',
-#                                       'map', #source frame
-#                                       rospy.Time(0), #get the tf at first available time
-#                                       rospy.Duration(1.0)) #wait for 1 second
-#
-#         grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform) #NOT USED
+
+         pose_publisher.publish(grasp_pose)
         
          self.group.set_pose_target(grasp_pose)
-         #pdb.set_trace()
-         #log target pose in base
-         #log current pose in base
-         #log current time
+
          logger.update_log('Arm Planning Start')
          
          plan = self.group.plan()
          logger.update_log('Arm Planning End')
          logger.update_log('Arm Planning Success', bool(plan.joint_trajectory.points))
-         #pdb.set_trace()
-         #print(p1)
+
          #log time after plan completed
          #log execution time start
-         logger.update_log('Arm Execution Start')
          logger.update_log('Arm Execution Start Pose', amcl.get_pose())
+         logger.update_log('Arm Execution Start')
          arm_execution_success = self.group.execute(plan)
          logger.update_log('Arm Execution Success', arm_execution_success)
          #log execution time end
          time.sleep(1)
          if not plan.joint_trajectory.points:
              return
-         
          base_to_map_transform_updated = self.tf_buffer.lookup_transform('base_link',
                                        'map', #source frame
                                        rospy.Time(0), #get the tf at first available time
                                        rospy.Duration(1.0)) #wait for 1 second
-
+         
          grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform_updated)
-         #pdb.set_trace()
-         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = True)
-         time.sleep(0.25)
+         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
+
          logger.update_log('Cartesian Servoing Success', cartesian_servoing_success)
-         #pdb.set_trace()
+         time.sleep(0.25)
          cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.1, avoid_collisions = False)
          logger.update_log('Cartesian Linear Success', cartesian_moving_down_success)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
-         time.sleep(1)
-         #pdb.set_trace()
+         time.sleep(0.5)
         
          self.gripper_open()
-         #time.sleep(1)
-         #self.gripper_close()
-         #pdb.set_trace()
          self.gripper_close()
-         time.sleep(1)
+         time.sleep(0.5)
          self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -0.2) #lift up
-         
-         #group.get_end_effector_link()
+
 
     def gripper_open(self):
         """Opens the gripper.
@@ -347,53 +321,17 @@ class GraspingClient(object):
         self.gripper_client.wait_for_result()
         
     def updateScene(self):
-        # find objects
-        goal = FindGraspableObjectsGoal()
-        goal.plan_grasps = True
-        self.find_client.send_goal(goal)
-        self.find_client.wait_for_result(rospy.Duration(5.0))
-        find_result = self.find_client.get_result()
-
-        # remove previous objects
-        for name in self.scene.getKnownCollisionObjects():
-            self.scene.removeCollisionObject(name, False)
-        for name in self.scene.getKnownAttachedObjects():
-            self.scene.removeAttachedObject(name, False)
-        self.scene.waitForSync()
-
-        # insert objects to scene
-        idx = -1
-        for obj in find_result.objects:
-            idx += 1
-            obj.object.name = "object%d"%idx
-            self.scene.addSolidPrimitive(obj.object.name,
-                                         obj.object.primitives[0],
-                                         obj.object.primitive_poses[0],
-                                         )
-
-        for obj in find_result.support_surfaces:
-            # extend surface to floor, and make wider since we have narrow field of view
-            height = obj.primitive_poses[0].position.z
-            obj.primitives[0].dimensions = [obj.primitives[0].dimensions[0],
-                                            1.5,  # wider
-                                            obj.primitives[0].dimensions[2] + height]
-            obj.primitive_poses[0].position.z += -height/2.0
-
-            # add to scene
-            self.scene.addSolidPrimitive(obj.name,
-                                         obj.primitives[0],
-                                         obj.primitive_poses[0],
-                                         )
-
-        self.scene.waitForSync()
-
-        # store for grasping
-        self.objects = find_result.objects
-        self.surfaces = find_result.support_surfaces
-
-    
-   
-
+       
+        # insert table to scene
+        table_height = 0.47
+        table_width = 0.8
+        table_length = 0.4
+        
+        table_pose_in_world = self.gazebo_client.get_pose('coke_can')
+        self.scene.attach_box("map", "table", 
+                         table_pose_in_world, (table_length, table_width, table_height)
+                        )
+        
     def tuck(self):
         joints = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
                   "elbow_flex_joint", "forearm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
@@ -405,7 +343,6 @@ class GraspingClient(object):
             
     def move_gripper_linearly(self, grasp_pose, reduce_height_by = 0.20, avoid_collisions = False, eef_step = 0.005): #computes cartesian path and goes down by depth m
         
-        #self.group.set_goal_tolerance(0.0005)
         waypoints = []
         
         waypoints.append(grasp_pose.pose)
@@ -413,12 +350,10 @@ class GraspingClient(object):
         
         target_pose.pose.position.z -= reduce_height_by
         waypoints.append(target_pose.pose)
-        #pdb.set_trace()
+        
         trajectory, fraction = self.group.compute_cartesian_path(waypoints, eef_step, 0, avoid_collisions)
-        #pdb.set_trace()
         cartesian_execute_success = self.group.execute(trajectory) #execute previously planned trajectory
-        #self.group.set_goal_tolerance(0.001)
-        #pdb.set_trace()
+        
         return cartesian_execute_success
         
 
@@ -467,7 +402,6 @@ class GazeboPoseMaster:
         rospy.wait_for_service(self.get_pose_srv_name)
         obj_pose = self.pose_getter(obj_pose_req)
         
-        #pdb.set_trace()
         return obj_pose
     
     def check_grasp_success(self, object_name = 'coke_can', height_threshold = 0.75): #if height is greater than 1, we lifted it
@@ -526,7 +460,6 @@ class RvizMarkerPublish:
        marker.color.b = 0.0
        marker.pose = pose.pose
       
-       #pdb.set_trace()
        self.publisher.publish(marker)
        
 def shutdown_process():
@@ -544,9 +477,6 @@ def shutdown_process():
     
     
 def sample_valid_navigation_goal(publish_goal_marker = True):
-    
-    #TODO -  currently this function has hardcoded sample bounds. Make it map specific
-    #pose angle theta is also fixed.
     
     theta = 1.57 #currently dixed
     
@@ -587,7 +517,6 @@ if sample_random_nav_goal:
 else:
     nav_goal = default_nav_goal
     
-#grasping_client.updateScene()
 gazebo_client.set_pose_relative('coke_can', can_offset_x, can_offset_y, 0)
 
 move_base.clear_costmap()
@@ -595,11 +524,12 @@ move_base.clear_costmap()
 obj_pose_before = gazebo_client.get_pose('coke_can')
 logger.update_log('Can Pose', obj_pose_before)
 
+#pdb.set_trace()
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 #pdb.set_trace()
 #rospy.sleep(3)
 
-head_action.look_at_surroundings(pan_range = 45, tilt_range = 45) #build octomap
+head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
 
 obj_pose = gazebo_client.get_pose()
 grasping_client.pick(obj_pose)
