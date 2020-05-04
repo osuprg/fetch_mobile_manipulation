@@ -22,6 +22,9 @@
   	<arg name="z" value="0.0" />
   	<arg name="yaw" value="1.57"/>
   </include>
+
+  <!--load our own version of fetch gazebo, only difference is fake odom plugin -->
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find navr)/robots/fetch.gazebo.xacro"/>
  
    <node pkg="navr" type="broadcaster.py" name="odom_fake_publisher"/>
 
