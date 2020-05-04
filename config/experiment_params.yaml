@@ -13,6 +13,8 @@ log_folder: /home/sritee/catkin_ws/src/navr/logs_test/
 config_folder: /home/sritee/catkin_ws/src/navr/config/
 #height above which can is considered lifted
 success_height: 0.5 
+#whether to constraint flex joint or not
+constrained_wrist_flex_joint: True
 
 [gazebo]
 #gazebo params

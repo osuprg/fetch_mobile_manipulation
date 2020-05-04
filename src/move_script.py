@@ -25,6 +25,9 @@ from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from gazebo_msgs.srv import GetModelStateRequest, GetModelState
 from gazebo_msgs.srv import SetModelStateRequest, SetModelState
+from moveit_commander import Constraints
+from moveit_msgs.msg import JointConstraint
+        
 from visualization_msgs.msg import Marker
 from std_srvs.srv import Empty
 import pdb
@@ -68,6 +71,8 @@ default_nav_goal[0] += can_offset_x
 default_nav_goal[1] += can_offset_y
 
 log_directory = config.get(experiment_section_name, 'log_folder')
+
+constrain_wrist_flex_joint = (config.get(experiment_section_name, 'constrained_wrist_flex_joint') == 'True')
 #pdb.set_trace()
 # Move base using navigation stack
 class MoveBaseClient(object):
@@ -238,8 +243,10 @@ class GraspingClient(object):
         self.gripper_client.wait_for_server(rospy.Duration(10))
         
         self.gazebo_client = GazeboPoseMaster()
-
         
+        if constrain_wrist_flex_joint:
+            self.fix_joint('wrist_flex_joint') #fix elbow joint
+
     def pick(self, obj_gazebo_pose):
          
 
@@ -321,6 +328,26 @@ class GraspingClient(object):
         goal.command.max_effort = self.MAX_EFFORT
         self.gripper_client.send_goal(goal)
         self.gripper_client.wait_for_result()
+        
+    def fix_joint(self, joint_name): #by default last joint remains at default pos
+        
+        try:
+            joint_idx = self.group.get_active_joints().index(joint_name)
+        except ValueError:
+            raise
+            
+        c = Constraints()
+        jc = JointConstraint()
+        
+        jc.joint_name = self.group.get_active_joints()[joint_idx]
+        jc.position = self.group.get_current_joint_values()[joint_idx]
+        jc.weight = 1.0
+        jc.tolerance_above = 0.025
+        jc.tolerance_below = 0.025
+        
+        c.joint_constraints.append(jc)
+        
+        self.group.set_path_constraints(c)
         
     def updateScene(self):
        
@@ -502,7 +529,7 @@ amcl = AmclPose() #TODO - WE ARE ACTUALLY USING ODOMETRY AS AMCL, clean this up
 move_base = MoveBaseClient()
 torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
 head_action = PointHeadClient()
-grasping_client = GraspingClient()
+grasping_client = GraspingClient("arm")
 #    #        
 gazebo_client = GazeboPoseMaster()
 #    #    
