@@ -3,3 +3,5 @@
 *.gv
 *.pkl
 *.png
+logs/
+results/
