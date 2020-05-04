@@ -86,7 +86,7 @@ def add_limits_and_labels_to_axes(ax, x_range = None, y_range = None, x_title = 
     if x_range is not None:
         ax.set_xlim(x_range[0] - 0.3, x_range[1])
     if y_range is not None:
-        ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.7)
+        ax.set_ylim(y_range[0] - 0.1, y_range[1] + 0.4)
         
     ax.set_xlabel(x_title, fontsize = fontsize)
     ax.set_ylabel(y_title, fontsize = fontsize)
