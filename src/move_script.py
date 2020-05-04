@@ -58,15 +58,17 @@ sample_random_nav_goal = (config.get(experiment_section_name, 'sample_random_nav
 can_offset_x = float(config.get(experiment_section_name, 'can_offset_x'))
 can_offset_y = float(config.get(experiment_section_name, 'can_offset_y'))
 
+sample_both_sides = (config.get(experiment_section_name, 'sample_both_sides') == 'True') #THIS will override y_low and high if true
+
 x_low = float(config.get(experiment_section_name, 'sample_xlow')) + can_offset_x
 x_high = float(config.get(experiment_section_name, 'sample_xhigh'))  + can_offset_x
 y_low = float(config.get(experiment_section_name, 'sample_ylow'))  + can_offset_y
 y_high = float(config.get(experiment_section_name, 'sample_yhigh'))  + can_offset_y
+yaw = float(config.get(experiment_section_name, 'yaw'))
 
 success_height = float(config.get(experiment_section_name, 'success_height'))
-
-default_nav_goal = [-0.65, 1.66, -1.57]
-#default_nav_goal = [-0.50, 2.86, -1.57]
+#default_nav_goal = [-0.45, 1.65, yaw]
+default_nav_goal = [-0.45, 2.90, yaw]
 default_nav_goal[0] += can_offset_x
 default_nav_goal[1] += can_offset_y
 
@@ -507,10 +509,25 @@ def shutdown_process():
     
 def sample_valid_navigation_goal(publish_goal_marker = True):
     
-    theta = default_nav_goal[-1] #currently fixed to be same as default yaw
-    
-    x_val = np.random.uniform(low = x_low , high = x_high)
-    y_val =  np.random.uniform(low = y_low, high = y_high)
+    if sample_both_sides:
+        
+        x_val = np.random.uniform(low = x_low , high = x_high)
+        
+        if np.random.rand() > 0.5: #bottom side
+            theta = 1.57
+            y_val =  np.random.uniform(low = 1.54, high = 1.7)
+        
+        else: #top side
+            
+            theta = -1.57
+            y_val =  np.random.uniform(low = 2.84, high = 3)
+            
+    else:
+        
+        theta = yaw
+        
+        x_val = np.random.uniform(low = x_low , high = x_high)
+        y_val =  np.random.uniform(low = y_low, high = y_high)
     
     if publish_goal_marker:
         
