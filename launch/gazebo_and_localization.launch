@@ -49,7 +49,8 @@
   </node>
   </group>
 
-  <!-- localize the robot -->
+  <!-- localize the robot. Note, currently we use fake odometry, no amcl. Need 
+   to include it and run if running on Real robot. -->
   <!--<include file="$(arg amcl_include)" />-->
 
   <!-- move the robot -->
@@ -66,8 +67,28 @@
   <include file="$(find fetch_moveit_config)/launch/move_group.launch" >
     <arg name="info" value="true"/><!-- publish grasp markers -->
   </include>
-   <rosparam command="load" file = "$(find navr)/config/moveit_params.yaml"/>
+
+  <!-- use our own srdf file -->
+  <param name="robot_description_semantic" textfile="$(find navr)/config/moveit/fetch.srdf"/>
+  
+  <!-- override the kinematics with our kinematics file -->
+  <group ns="robot_description_kinematics">
+    <rosparam command="load" file="$(find navr)/config/moveit/kinematics.yaml"/>
+  </group>
+ 
+  <!-- use our own yaml files -->
+   <rosparam command="load" file="$(find navr)/config/moveit/ompl_planning.yaml"/>
+   <rosparam command="load" file="$(find navr)/config/moveit/controllers.yaml"/>
+   <rosparam command="load" file="$(find navr)/config/moveit/fake_controllers.yaml"/>
+   <rosparam command="load" file="$(find navr)/config/moveit/sensors.yaml"/>
+
+  <!--some moveit hyperparams -->
+  <rosparam command="load" file = "$(find navr)/config/moveit_params.yaml"/>
+  
+  <!-- we are saying gazebo world center is map center using a static publisher -->
   <node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /map /odom 50"/>
+
+  <!-- optional rviz launch -->
   <group if="$(arg rviz)">
   <node type="rviz" name="rviz" pkg="rviz"/>
   </group>

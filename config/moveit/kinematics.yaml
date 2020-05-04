@@ -1,0 +1,16 @@
+arm:
+  kinematics_solver: trac_ik_kinematics_plugin/TRAC_IKKinematicsPlugin
+  kinematics_solver_attempts: 3
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+arm_with_torso:
+  kinematics_solver: trac_ik_kinematics_plugin/TRAC_IKKinematicsPlugin
+  kinematics_solver_attempts: 3
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+arm_without_gripper_axis:
+  kinematics_solver: trac_ik_kinematics_plugin/TRAC_IKKinematicsPlugin
+  kinematics_solver_attempts: 3
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+
