@@ -41,7 +41,7 @@ log_folder: /home/sritee/catkin_ws/src/navr/logs/testing_one ----> /home/(your u
 
 ```
 cd ~/catkin_ws/src/navr/src/
-./collect_data 1
+./collect_data.sh 1
 ```
 
 This does a single run of fetch manipulation. 
