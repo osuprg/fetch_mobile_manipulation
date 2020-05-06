@@ -36,8 +36,6 @@
   <arg name="move_base_include" default="$(find fetch_navigation)/launch/include/move_base.launch.xml" />
   <arg name="amcl_include" default="$(find fetch_navigation)/launch/include/amcl.launch.xml" />
   
-  <!--world and map are aligned for fake odometry -->
-  <!--<node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /world /map 50"/>-->
   <!-- serve up a map -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
