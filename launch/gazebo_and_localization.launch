@@ -80,11 +80,13 @@
   </group>
  
   <!-- use our own yaml files -->
+   
+   <group ns="move_group">
    <rosparam command="load" file="$(find navr)/config/moveit/ompl_planning.yaml"/>
-   <rosparam command="load" file="$(find navr)/config/moveit/controllers.yaml"/>
-   <rosparam command="load" file="$(find navr)/config/moveit/fake_controllers.yaml"/>
    <rosparam command="load" file="$(find navr)/config/moveit/sensors.yaml"/>
-
+   <rosparam command="load" file="$(find navr)/config/moveit/controllers.yaml"/>
+   </group>
+   
   <!--some moveit hyperparams -->
   <rosparam command="load" file = "$(find navr)/config/moveit_params.yaml"/>
   
