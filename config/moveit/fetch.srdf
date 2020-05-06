@@ -19,15 +19,6 @@
         <joint name="wrist_roll_joint" />
         <joint name="gripper_axis"/>
     </group>
-    <group name="arm_without_gripper_axis">
-        <joint name="shoulder_pan_joint" />
-        <joint name="shoulder_lift_joint" />
-        <joint name="upperarm_roll_joint" />
-        <joint name="elbow_flex_joint" />
-        <joint name="forearm_roll_joint" />
-        <joint name="wrist_flex_joint" />
-        <joint name="wrist_roll_joint" />
-    </group>
     <group name="arm_with_torso">
         <joint name="torso_lift_joint" />
         <joint name="shoulder_pan_joint" />
