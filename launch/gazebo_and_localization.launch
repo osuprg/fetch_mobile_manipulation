@@ -59,7 +59,7 @@
   </include>
 
   <!-- tilt the head -->
-  <node pkg="fetch_navigation" type="tilt_head.py" name="tilt_head_node" />
+  <!--<node pkg="fetch_navigation" type="tilt_head.py" name="tilt_head_node" />-->
   
    <!-- Start MoveIt -->
   <include file="$(find fetch_moveit_config)/launch/move_group.launch" >

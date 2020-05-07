@@ -572,7 +572,7 @@ logger.update_log('Can Pose', obj_pose_before)
 
 move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
 
-time.sleep(5)
+#time.sleep(5)
 head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
 
 obj_pose = gazebo_client.get_pose()
