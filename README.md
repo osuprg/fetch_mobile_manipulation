@@ -8,7 +8,12 @@ Tested on Ubuntu 16.04, ROS Kinetic, Gazebo 7, PCL 1.8. Uses the fetch packages 
 ```
 sudo apt-get update
 sudo apt-get install ros-kinetic-fetch-* (note - will install few additional ones than necessary)
+wget https://www.dropbox.com/s/9llzm20pc4opdn9/PCL-1.8.0-Linux.deb?dl=0 (pre-built binary of PCL)
 sudo dpkg -i PCL-1.8.0-Linux.deb (Point Cloud Library install)
+sudo apt-get install ros-kinetic-trac-ik-kinematics-plugin (for Analytic Inverse Kinematics)
+
+Please download gazebo models from https://bitbucket.org/osrf/gazebo_models/src/default/, and put them in 
+~/.gazebo/models so your gazebo GUI can find them. 
 ```
 
 ## Build
