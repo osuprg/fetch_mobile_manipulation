@@ -1,5 +1,6 @@
 [experiment_section]
 #details
+#ALL PATHS ARE W.R.T package root
 sample_random_nav_goal: False
 sample_xlow: -0.5
 sample_xhigh: 0
@@ -12,22 +13,23 @@ default_goal: -0.4,1.66, 1.57 #TODO - use this
 can_offset_x: 0
 can_offset_y: 0
 #note that can offsets changes the sample_xlow range accordingly
-log_folder: /home/sritee/catkin_ws/src/navr/logs_test/
-config_folder: /home/sritee/catkin_ws/src/navr/config/
+log_folder: /logs/
+config_folder: /config/
 #height above which can is considered lifted
 success_height: 0.5 
 #whether to constraint flex joint or not
 constrained_wrist_flex_joint: True
 
+#ALL PATHS ARE W.R.T package root
 [gazebo]
 #gazebo params
 render: True
 sleep_time_after_fetchspawn: 6
 #max duration experiment will run
 experiment_duration: 60
-gazebo_launch: /home/sritee/catkin_ws/src/navr/launch/gazebo_and_localization.launch
-move_script: /home/sritee/catkin_ws/src/navr/launch/test.launch
-world_file: /home/sritee/catkin_ws/src/navr/worlds/hard_world_2.world
+gazebo_launch: /launch/gazebo_and_localization.launch
+move_script: /launch/test.launch
+world_file: /worlds/grasp_table.world
 
 
 

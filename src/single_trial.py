@@ -15,6 +15,12 @@ import time
 import ConfigParser
 import utils
 from std_srvs.srv import Empty
+import rospkg 
+
+rospack = rospkg.RosPack()
+# get the file path for rospy_tutorials
+navr_path = rospack.get_path('navr')
+config_path = navr_path + '/config/'
 
 def kill_launch_service(request):
     
@@ -31,7 +37,7 @@ def kill_launch_service(request):
     experiment_running = False
 
 config = ConfigParser.ConfigParser()
-config.read('../config/experiment_params.yaml')
+config.read(config_path + 'experiment_params.yaml')
 
 gazebo_section_name = 'gazebo'
 
@@ -39,15 +45,14 @@ gazebo_section_name = 'gazebo'
 render = (config.get(gazebo_section_name, 'render') == 'True')
 single_trial_time = int(config.get(gazebo_section_name, 'experiment_duration')) #time taken for single trial -- TODO, Make this automatic by sending signal from ros node
 fetch_bringup_time = int(config.get(gazebo_section_name, 'sleep_time_after_fetchspawn'))
-launch_gazebo_path = config.get(gazebo_section_name, 'gazebo_launch')
-launch_node_path = config.get(gazebo_section_name, 'move_script')
-world_file = config.get(gazebo_section_name, 'world_file')
+launch_gazebo_path = navr_path + config.get(gazebo_section_name, 'gazebo_launch')
+launch_node_path = navr_path + config.get(gazebo_section_name, 'move_script')
+world_file = navr_path + config.get(gazebo_section_name, 'world_file')
 
 port=str(11311)
 port_gazebo=str(11312)
 
 experiment_running = True
-
 
 os.environ["ROS_MASTER_URI"] = "http://localhost:"+ port
 os.environ["GAZEBO_MASTER_URI"] = "http://localhost:"+ port_gazebo

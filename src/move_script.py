@@ -44,8 +44,12 @@ import datetime
 import pandas as pd
 from logger import CustomLogger
 import ConfigParser
+import rospkg 
 
-config_file_folder = '/home/sritee/catkin_ws/src/navr/config/'
+rospack = rospkg.RosPack()
+# get the file path for navr
+navr_path = rospack.get_path('navr')
+config_file_folder = navr_path + '/config/'
 
 logger = CustomLogger()
 config = ConfigParser.ConfigParser()
@@ -67,8 +71,8 @@ y_high = float(config.get(experiment_section_name, 'sample_yhigh'))  + can_offse
 yaw = float(config.get(experiment_section_name, 'yaw'))
 
 success_height = float(config.get(experiment_section_name, 'success_height'))
-#default_nav_goal = [-0.45, 1.65, yaw]
-default_nav_goal = [-0.45, 2.90, yaw]
+default_nav_goal = [-0.45, 1.65, yaw]
+#default_nav_goal = [-0.45, 2.90, yaw]
 default_nav_goal[0] += can_offset_x
 default_nav_goal[1] += can_offset_y
 
