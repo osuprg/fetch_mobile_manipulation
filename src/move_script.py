@@ -480,10 +480,10 @@ class RvizMarkerPublish:
         self.topic_name = topic_name
         self.publisher = rospy.Publisher(self.topic_name, Marker, queue_size = 10)
         
-    def publish(self, pose):
+    def publish(self, pose, frame = "/map"):
         
        marker = Marker()
-       marker.header.frame_id = "/map"
+       marker.header.frame_id = frame
        marker.type = marker.SPHERE
        marker.action = marker.ADD
        marker.scale.x = 0.05
