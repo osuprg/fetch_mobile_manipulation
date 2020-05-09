@@ -18,7 +18,7 @@ config_folder: /config/
 #height above which can is considered lifted
 success_height: 0.5 
 #whether to constraint flex joint or not
-constrained_wrist_flex_joint: True
+constrained_wrist_flex_joint: False
 
 #ALL PATHS ARE W.R.T package root
 [gazebo]
