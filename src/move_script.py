@@ -500,17 +500,16 @@ class RvizMarkerPublish:
 def shutdown_process():
     #currently doing logging during node shutdown
     cnt = 1
-    if not os.path.exists(log_directory):
-        os.mkdir(log_directory)
-    while os.path.exists(log_directory + 'run_' + str(cnt) + '.pkl'):
+    if not os.path.exists(navr_path + log_directory):
+        os.mkdir(navr_path + log_directory)
+    while os.path.exists(navr_path + log_directory + 'run_' + str(cnt) + '.pkl'):
         cnt+=1    
     rospy.loginfo("Saving Log file")
     
     config_file_list = [config_file_folder + f for f in os.listdir(config_file_folder)]
-    logger.save(logdir = log_directory, name = 'run_'  + str(cnt) + '.pkl', 
+    logger.save(logdir = navr_path + log_directory, name = 'run_'  + str(cnt) + '.pkl', 
                 config_files= config_file_list)
-    
-    
+
 def sample_valid_navigation_goal(publish_goal_marker = True):
     
     if sample_both_sides:

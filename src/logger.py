@@ -68,7 +68,7 @@ class CustomLogger:
         
         self._data.to_pickle(logdir + name)
         for file_name in config_files:
-            os.popen('cp {} {}'.format(file_name, logdir)) #Save the config files seperately
+            os.popen('cp -r {} {}'.format(file_name, logdir)) #Save the config files seperately
             
     
     def __str__(self):
