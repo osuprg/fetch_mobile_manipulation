@@ -540,56 +540,59 @@ def sample_valid_navigation_goal(publish_goal_marker = True):
         pose_publisher.publish(goal_pose)
    
     return [x_val, y_val, theta]
+
+
+if __name__ == '__main__':
       
-rospy.init_node("demo", anonymous = True)
-rospy.on_shutdown(shutdown_process)
-
-amcl = AmclPose() #TODO - WE ARE ACTUALLY USING ODOMETRY AS AMCL, clean this up
-# Setup clients
-move_base = MoveBaseClient()
-torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
-head_action = PointHeadClient()
-grasping_client = GraspingClient("arm")
-#    #        
-gazebo_client = GazeboPoseMaster()
-#    #    
-pose_publisher =  RvizMarkerPublish()
-
-##
-#Move the base to be in front of the table
-rospy.loginfo("Setting initial pose")   
-#amcl.set_pose()
-rospy.loginfo("Moving to table...")
-if sample_random_nav_goal:
-    nav_goal = sample_valid_navigation_goal()
-    print('RANDOM GOAL')
-else:
-    nav_goal = default_nav_goal
+    rospy.init_node("demo", anonymous = True)
+    rospy.on_shutdown(shutdown_process)
     
-gazebo_client.set_pose_relative('coke_can', can_offset_x, can_offset_y, 0)
-
-move_base.clear_costmap()
-#
-obj_pose_before = gazebo_client.get_pose('coke_can')
-logger.update_log('Can Pose', obj_pose_before)
-
-move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
-
-#time.sleep(5)
-head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
-
-obj_pose = gazebo_client.get_pose()
-grasping_client.pick(obj_pose)
-#
-logger.update_log('Success', gazebo_client.check_grasp_success(height_threshold = success_height))
-
-#Time to request to kill ourselves!
-try: #To avoid error that service call didn't return we wrap in try catch
-    rospy.wait_for_service('kill_launch')
-    kill_us = rospy.ServiceProxy('kill_launch', Empty)
-    kill_us.call()
-except:
-    pass
+    amcl = AmclPose() #TODO - WE ARE ACTUALLY USING ODOMETRY AS AMCL, clean this up
+    # Setup clients
+    move_base = MoveBaseClient()
+    torso_action = FollowTrajectoryClient("torso_controller", ["torso_lift_joint"])
+    head_action = PointHeadClient()
+    grasping_client = GraspingClient("arm")
+    #    #        
+    gazebo_client = GazeboPoseMaster()
+    #    #    
+    pose_publisher =  RvizMarkerPublish()
+    
+    ##
+    #Move the base to be in front of the table
+    rospy.loginfo("Setting initial pose")   
+    #amcl.set_pose()
+    rospy.loginfo("Moving to table...")
+    if sample_random_nav_goal:
+        nav_goal = sample_valid_navigation_goal()
+        print('RANDOM GOAL')
+    else:
+        nav_goal = default_nav_goal
+        
+    gazebo_client.set_pose_relative('coke_can', can_offset_x, can_offset_y, 0)
+    
+    move_base.clear_costmap()
+    #
+    obj_pose_before = gazebo_client.get_pose('coke_can')
+    logger.update_log('Can Pose', obj_pose_before)
+    
+    move_base.goto(nav_goal[0], nav_goal[1], nav_goal[2]) #unpack goal
+    
+    #time.sleep(5)
+    head_action.look_at_surroundings(pan_range = 30, tilt_range = 45) #build octomap
+    
+    obj_pose = gazebo_client.get_pose()
+    grasping_client.pick(obj_pose)
+    #
+    logger.update_log('Success', gazebo_client.check_grasp_success(height_threshold = success_height))
+    
+    #Time to request to kill ourselves!
+    try: #To avoid error that service call didn't return we wrap in try catch
+        rospy.wait_for_service('kill_launch')
+        kill_us = rospy.ServiceProxy('kill_launch', Empty)
+        kill_us.call()
+    except:
+        pass
 
 
 
