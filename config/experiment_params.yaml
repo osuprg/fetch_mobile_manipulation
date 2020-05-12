@@ -7,7 +7,7 @@ sample_xhigh: 0
 sample_ylow : 1.55
 sample_yhigh: 1.7
 #Overrides y_low and y_high if sample_both_sides set to true
-sample_both_sides: True 
+sample_both_sides: False
 yaw: 1.57
 default_goal: -0.4,1.66, 1.57 #TODO - use this
 can_offset_x: 0
