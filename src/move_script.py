@@ -290,17 +290,12 @@ class GraspingClient(object):
          time.sleep(1)
          if not plan.joint_trajectory.points:
              return
-         base_to_map_transform_updated = self.tf_buffer.lookup_transform('base_link',
-                                       'map', #source frame
-                                       rospy.Time(0), #get the tf at first available time
-                                       rospy.Duration(1.0)) #wait for 1 second
-         
-         grasp_pose_in_base = tf2_geometry_msgs.do_transform_pose(grasp_pose, base_to_map_transform_updated)
-         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.0, avoid_collisions = False)
+
+         cartesian_servoing_success = self.move_gripper_linearly(grasp_pose, delta_x = 0, delta_y = 0, delta_z = 0, avoid_collisions = False)
 
          logger.update_log('Cartesian Servoing Success', cartesian_servoing_success)
          time.sleep(0.25)
-         cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = 0.1, avoid_collisions = False)
+         cartesian_moving_down_success = self.move_gripper_linearly(grasp_pose, delta_x = 0, delta_y = 0, delta_z = -0.1, avoid_collisions = False)
          logger.update_log('Cartesian Linear Success', cartesian_moving_down_success)
          logger.update_log('Arm Execution End')
          logger.update_log('Arm Execution End Pose', amcl.get_pose())
@@ -309,7 +304,7 @@ class GraspingClient(object):
          self.gripper_open()
          self.gripper_close()
          time.sleep(0.5)
-         self.move_gripper_linearly(grasp_pose_in_base, reduce_height_by = -0.2) #lift up
+         self.move_gripper_linearly(grasp_pose, delta_z = 0.2) #lift up
 
 
     def gripper_open(self):
@@ -376,18 +371,28 @@ class GraspingClient(object):
             if result.error_code.val == MoveItErrorCodes.SUCCESS:
                 return
             
-    def move_gripper_linearly(self, grasp_pose, reduce_height_by = 0.20, avoid_collisions = False, eef_step = 0.005): #computes cartesian path and goes down by depth m
-        
+    def move_gripper_linearly(self, current_pose, delta_x = None, delta_y = None, delta_z = None, avoid_collisions = False, eef_step = 0.005): #computes cartesian path and goes down by depth m
+            
         waypoints = []
         
-        waypoints.append(grasp_pose.pose)
-        target_pose = copy.deepcopy(grasp_pose)
+        old_frame = self.group.get_pose_reference_frame() #make backup of the original frame
+        self.group.set_pose_reference_frame(current_pose.header.frame_id) #cartesian trajectory plans in this frame
+        waypoints.append(current_pose.pose) #our current pose
+        target_pose = copy.deepcopy(current_pose)
         
-        target_pose.pose.position.z -= reduce_height_by
+        if delta_x:
+            target_pose.pose.position.x += delta_x
+        if delta_y:
+            target_pose.pose.position.y += delta_y
+        if delta_z:
+            target_pose.pose.position.z += delta_z
+            
         waypoints.append(target_pose.pose)
         
         trajectory, fraction = self.group.compute_cartesian_path(waypoints, eef_step, 0, avoid_collisions)
         cartesian_execute_success = self.group.execute(trajectory) #execute previously planned trajectory
+        
+        self.group.set_pose_reference_frame(old_frame) #reset back to old planning frame
         
         return cartesian_execute_success
         
