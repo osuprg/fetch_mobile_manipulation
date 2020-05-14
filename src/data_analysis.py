@@ -21,7 +21,7 @@ import time
 
 filter_arm_failure = True #filter planning failures
 filter_only_success = True
-y_min_filter = 1.57
+y_min_filter = None
 
 NORMALIZE_POSE_ACCORDING_TO_CAN = False #shift the exec pose linearly according to a default can pose
 
@@ -32,7 +32,7 @@ choices_wanted = [-1]
 dir_names = []
 
 for choices_idx in choices_wanted:
-    dir_names.append(choices[choices_idx])
+    dir_names.append('logs/' + choices[choices_idx])
 
 
 all_plots = ['success_plot', 'navigation_and_grasping_plot', 
@@ -41,13 +41,14 @@ all_plots = ['success_plot', 'navigation_and_grasping_plot',
 surface_plots = []
 #surface_plots = ['linear', 'quadratic', 'cubic']
 
-save_dir = '../results/' + dir_names[-1] + '/'
+save_dir = '../results/' + dir_names[-1].split('/')[-1] + '/'
+#save_dir = '../results/' + dir_names[-1] + '/'
 
 for plotted in all_plots:
     
 
     x_range = [-0.2, 0.2] #OVERRIDEN LATER according to can pose
-    y_range = [1.55, 1.7]
+    y_range = [1.55, 3]
     
     if plotted == 'grasping_only_plot':
         if not NORMALIZE_POSE_ACCORDING_TO_CAN:
