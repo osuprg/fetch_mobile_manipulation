@@ -18,7 +18,7 @@ from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryG
 from control_msgs.msg import PointHeadAction, PointHeadGoal
 from control_msgs.msg import GripperCommandGoal, GripperCommandAction
 from grasping_msgs.msg import FindGraspableObjectsAction, FindGraspableObjectsGoal
-from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from nav_msgs.msg import Odometry
 from moveit_msgs.msg import PlaceLocation, MoveItErrorCodes
@@ -96,11 +96,7 @@ class MoveBaseClient(object):
         move_goal.target_pose.pose.position.y = y
         
         quat = tf.transformations.quaternion_from_euler(0, 0, theta) #rotation about z axis
-        
-        move_goal.target_pose.pose.orientation.x = quat[0]
-        move_goal.target_pose.pose.orientation.y = quat[1]
-        move_goal.target_pose.pose.orientation.z = quat[2]
-        move_goal.target_pose.pose.orientation.w = quat[3]
+        move_goal.target_pose.pose.orientation = Quaternion(*quat)
         
         move_goal.target_pose.header.frame_id = frame
         move_goal.target_pose.header.stamp = rospy.Time.now()
@@ -261,11 +257,8 @@ class GraspingClient(object):
          grasp_pose.pose.position = obj_gazebo_pose.pose.position
 
          quat = tf.transformations.quaternion_from_euler(0, np.pi/2, 0) #rotation about z axis
-         
-         grasp_pose.pose.orientation.x = quat[0]
-         grasp_pose.pose.orientation.y = quat[1]
-         grasp_pose.pose.orientation.z = quat[2]
-         grasp_pose.pose.orientation.w = quat[3]
+         grasp_pose.pose.orientation = Quaternion(*quat)
+
          grasp_pose.header.stamp = rospy.Time.now()
          grasp_pose.header.frame_id = 'map'
          grasp_pose.pose.position.z+= self.gripper_height_above
