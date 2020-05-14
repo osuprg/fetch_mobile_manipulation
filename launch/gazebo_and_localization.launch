@@ -4,6 +4,7 @@
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/> <!--Doesnt work, gazebo bug -->
   <arg name="rviz" default="false"/>
+  <arg name="world_name" default="worlds/empty.world"/>
 
   <!-- Start Gazebo with a blank world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -12,7 +13,7 @@
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="headless" value="$(arg headless)"/>
-    <arg name="world_name" value="worlds/empty.world"/>
+    <arg name="world_name" value="$(arg world_name)"/>
   </include>
 
   <!-- Oh, you wanted a robot? Already spawned by world file -->
