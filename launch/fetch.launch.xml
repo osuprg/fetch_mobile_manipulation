@@ -12,6 +12,7 @@
   <param name="robot_description" command="$(find xacro)/xacro.py $(find navr)/robots/fetch.gazebo.xacro" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
     <param name="publish_frequency" value="100.0"/>
+    <param name="allow_active_sensing" value="true"/>
   </node>
 
   <!-- Put a robot in gazebo, make it look pretty -->
