@@ -54,20 +54,14 @@
   <build_depend>yaml</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>pcl_conversions</build_depend>
-  <build_depend>pcl_ros</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
-  <exec_depend>torch</exec_depend>
   <exec_depend>numpy</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <exec_depend>pcl_conversions</exec_depend>
-  <exec_depend>pcl_ros</exec_depend>
-  <exec_depend>libpcl-all</exec_depend>
 
   
   <exec_depend>sensor_msgs</exec_depend>

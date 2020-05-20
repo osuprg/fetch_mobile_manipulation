@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
-  pcl_ros
-  pcl_conversions
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,8 +108,6 @@ catkin_package(
 #  LIBRARIES homework1
   CATKIN_DEPENDS 
   roscpp rospy sensor_msgs
-  pcl_conversions
-  pcl_ros
 #  DEPENDS system_lib
 )
 
@@ -203,5 +199,3 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(dummy src/filter_cloud.cpp)
-target_link_libraries(dummy ${catkin_LIBRARIES})
