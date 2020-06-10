@@ -24,6 +24,10 @@ from gazebo_utils.pose_utils import GazeboPoseMaster
 from rviz_utils.rviz_utils import RvizMarkerPublisher
 
 class GraspingClient(object):
+    
+    """
+    This class is used to plan and move the arm.
+    """
 
     def __init__(self, group="arm"):
         

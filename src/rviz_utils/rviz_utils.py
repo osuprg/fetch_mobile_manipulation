@@ -6,6 +6,9 @@ import rospy
 
 class RvizMarkerPublisher:
     
+    """
+    This class is used to publish a circular marker at a given pose to Rviz
+    """
 
     def __init__(self, topic_name = 'can_pose_marker'):
         """
