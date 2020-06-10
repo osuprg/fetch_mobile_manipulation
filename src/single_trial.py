@@ -80,6 +80,7 @@ try:
     launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
     launch_gazebo.start()
 except:
+    print('Failed to launch!')
     pass
 finally:
     utils.replace_text_in_file(launch_gazebo_path, world_file, default_world) #Rewrite the correct world name in launch file
