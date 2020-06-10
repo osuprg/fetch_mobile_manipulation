@@ -6,16 +6,17 @@ Created on Thu Feb 20 19:21:59 2020
 @author: sritee
 """
 
-import roslaunch
-import rospy
 import os
 import subprocess
-import sys
 import time
-import ConfigParser
-import utils
+
 from std_srvs.srv import Empty
-import rospkg 
+import ConfigParser
+import roslaunch
+import rospkg
+import rospy
+
+import utils
 
 rospack = rospkg.RosPack()
 # get the file path for rospy_tutorials
@@ -75,10 +76,13 @@ roslaunch.configure_logging(uuid)
 
 kill_message_service = rospy.Service('kill_launch', Empty, kill_launch_service)
  
-launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
-launch_gazebo.start()
-
-utils.replace_text_in_file(launch_gazebo_path, world_file, default_world) #Rewrite the correct world name in launch file
+try:
+    launch_gazebo = roslaunch.parent.ROSLaunchParent(uuid, [launch_gazebo_path])
+    launch_gazebo.start()
+except:
+    pass
+finally:
+    utils.replace_text_in_file(launch_gazebo_path, world_file, default_world) #Rewrite the correct world name in launch file
 
 if not render:
     os.system("killall -9 gzclient")
