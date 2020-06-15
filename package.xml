@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>navr</name>
+  <name>fetch_mobile_manipulation</name>
   <version>0.0.0</version>
-  <description>The navr package of Sridhar Thiagarajan</description>
+  <description>The fetch_mobile_manipulation package of Sridhar Thiagarajan</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

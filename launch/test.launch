@@ -1,3 +1,3 @@
 <launch>
-<node pkg="navr" type="move_script.py" name="grasping_trial"/>
+<node pkg="fetch_mobile_manipulation" type="move_script.py" name="grasping_trial"/>
 </launch>
