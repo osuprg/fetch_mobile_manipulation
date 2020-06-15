@@ -4,6 +4,10 @@ This repository provides reusable modules and code for mobile manipulation. It w
 
 Tested on Ubuntu 16.04, ROS Kinetic, Gazebo 7. Uses the fetch packages in https://github.com/fetchrobotics/fetch_ros. 
 
+<p align="center">
+  <img src="/mobile_manipulation/images/top_view_random_goal.gif" alt="Sublime's custom image"/>
+</p>
+
 ## Install dependencies
 
 ```
