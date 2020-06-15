@@ -20,7 +20,7 @@ import utils
 
 rospack = rospkg.RosPack()
 # get the file path for this package
-navr_path = rospack.get_path('fetch_mobile_manipulation')
+navr_path = rospack.get_path('fetch_mobile_manipulation') + '/mobile_manipulation'
 config_path = navr_path + '/config/'
 
 def kill_launch_service(request):

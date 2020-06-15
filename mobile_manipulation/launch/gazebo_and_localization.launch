@@ -17,7 +17,7 @@
   </include>
 
   <!-- Oh, you wanted a robot? Already spawned by world file -->
-  <include file="$(find fetch_mobile_manipulation)/launch/$(arg robot).launch.xml">
+  <include file="$(find fetch_mobile_manipulation)/mobile_manipulation/launch/$(arg robot).launch.xml">
   	<arg name="x" value="0.0" />
   	<arg name="y" value="0.0" />
   	<arg name="z" value="0.0" />
@@ -29,7 +29,7 @@
   <!-- Navigation requires at least one map.
        In addition, it is sometimes desirable to have a "keepout" map
        which is used for costmaps, but not localization -->
-  <arg name="map_file" default="$(find fetch_mobile_manipulation)/maps/grasp_map_perfect.yaml" />
+  <arg name="map_file" default="$(find fetch_mobile_manipulation)/mobile_manipulation//maps/grasp_map_perfect.yaml" />
   <arg name="map_keepout_file" default="$(find fetch_maps)/maps/3_1_16_keepout.yaml" />
   <arg name="use_keepout" default="false" />
 
@@ -68,23 +68,23 @@
   </include>
 
   <!-- use our own srdf file -->
-  <param name="robot_description_semantic" textfile="$(find fetch_mobile_manipulation)/config/moveit/fetch.srdf"/>
+  <param name="robot_description_semantic" textfile="$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit/fetch.srdf"/>
   
   <!-- override the kinematics with our kinematics file -->
   <group ns="robot_description_kinematics">
-    <rosparam command="load" file="$(find fetch_mobile_manipulation)/config/moveit/kinematics.yaml"/>
+    <rosparam command="load" file="$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit/kinematics.yaml"/>
   </group>
  
   <!-- use our own yaml files -->
    
    <group ns="move_group">
-   <rosparam command="load" file="$(find fetch_mobile_manipulation)/config/moveit/ompl_planning.yaml"/>
-   <rosparam command="load" file="$(find fetch_mobile_manipulation)/config/moveit/sensors.yaml"/>
-   <rosparam command="load" file="$(find fetch_mobile_manipulation)/config/moveit/controllers.yaml"/>
+   <rosparam command="load" file="$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit/ompl_planning.yaml"/>
+   <rosparam command="load" file="$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit/sensors.yaml"/>
+   <rosparam command="load" file="$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit/controllers.yaml"/>
    </group>
    
   <!--some moveit hyperparams -->
-  <rosparam command="load" file = "$(find fetch_mobile_manipulation)/config/moveit_params.yaml"/>
+  <rosparam command="load" file = "$(find fetch_mobile_manipulation)/mobile_manipulation/config/moveit_params.yaml"/>
   
   <!-- we are saying gazebo world center is map center using a static publisher -->
   <node pkg="tf" type="static_transform_publisher" name="gazebo2rviz" args="0 0 0 0 0 0 /map /odom 50"/>

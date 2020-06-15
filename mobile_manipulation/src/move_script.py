@@ -56,7 +56,7 @@ if __name__ == '__main__':
     
     rospack = rospkg.RosPack()
     # get the file path for navr
-    navr_path = rospack.get_path('fetch_mobile_manipulation')
+    navr_path = rospack.get_path('fetch_mobile_manipulation') + '/mobile_manipulation'
     config_file_folder = navr_path + '/config/'
     
     config = ConfigParser.ConfigParser()
