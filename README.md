@@ -30,7 +30,7 @@ catkin_make
 
 ```
 source ~/fetch_ws/devel/setup.bash
-cd ~/fetch_ws/src/
+cd ~/fetch_ws/mobile_manipulation/src/
 ./collect_data.sh 1
 ```
 
@@ -38,7 +38,7 @@ This does a single run of mobile manipulation.
 
 ## Modules
 
-Useful modules can be found in the /src folder. Components are seperated out by utility.
+Useful modules can be found in the /mobile_manipulation/src folder. Components are seperated out by utility.
 
 ## Assumptions 
 
